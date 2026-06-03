@@ -1,0 +1,99 @@
+@extends('layouts.app')
+@section('title', 'Membres APE')
+
+@section('content')
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">
+        <i class="bi bi-people-fill me-2 text-primary"></i>
+        Association des Parents d'Élèves (APE)
+    </h4>
+    <a href="{{ route('ape.membres.create') }}" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg me-1"></i> Ajouter un membre
+    </a>
+</div>
+
+{{-- Filtre année scolaire --}}
+<div class="card p-3 mb-3">
+    <form method="GET" action="{{ route('ape.membres.index') }}" class="row g-2 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label small fw-semibold">Année scolaire</label>
+            <input type="text" name="annee_scolaire" class="form-control form-control-sm"
+                   value="{{ $anneeScolaire }}" placeholder="2025-2026">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-outline-primary btn-sm w-100">Filtrer</button>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <table class="table table-hover mb-0 align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>Nom & Prénom</th>
+                <th>Fonction</th>
+                <th>Téléphone</th>
+                <th>Email</th>
+                <th>Élève lié</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($membres as $membre)
+            <tr>
+                <td class="fw-semibold">{{ $membre->nom_complet }}</td>
+                <td>
+                    @php
+                        $colors = [
+                            'president'      => 'danger',
+                            'vice_president' => 'warning',
+                            'secretaire'     => 'info',
+                            'tresorier'      => 'success',
+                            'membre'         => 'secondary',
+                        ];
+                    @endphp
+                    <span class="badge bg-{{ $colors[$membre->fonction] }}">
+                        {{ $membre->fonction_label }}
+                    </span>
+                </td>
+                <td class="text-muted small">{{ $membre->telephone ?? '—' }}</td>
+                <td class="text-muted small">{{ $membre->email ?? '—' }}</td>
+                <td>
+                    @if($membre->eleve)
+                        <span class="badge bg-primary">{{ $membre->eleve->nom_complet }}</span>
+                    @else
+                        <span class="text-muted small">—</span>
+                    @endif
+                </td>
+                <td class="text-center">
+                    <a href="{{ route('ape.membres.edit', $membre) }}"
+                       class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <form action="{{ route('ape.membres.destroy', $membre) }}"
+                          method="POST" class="d-inline"
+                          onsubmit="return confirm('Supprimer ce membre ?')">
+                        @csrf @method('DELETE')
+                        <button class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="6" class="text-center text-muted py-4">
+                    Aucun membre APE enregistré.
+                </td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
+
+<div class="mt-3">
+    <a href="{{ route('ape.cotisations.index') }}" class="btn btn-success btn-sm">
+        <i class="bi bi-cash-coin me-1"></i> Voir les cotisations APE
+    </a>
+</div>
+@endsection
