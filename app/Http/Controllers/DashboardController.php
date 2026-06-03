@@ -24,8 +24,10 @@ class DashboardController extends Controller
     public function index()
     {
         $user    = auth()->user();
-        $classes = Classe::with(['eleves', 'fraisScolarite'])->get();
-
+$classes = Classe::with([
+    'eleves.paiements',
+    'fraisScolarite'
+])->get();
         $totalEleves   = Eleve::count();
         $totalAttendu  = 0;
         $totalCollecte = 0;
@@ -135,9 +137,8 @@ class DashboardController extends Controller
             ->get();
 
         $totalMembresAPE = ApeMembre::count();
-        $totalClasses    = Classe::count();
-        $totalElevesCarte = Eleve::count();
-
+       $totalClasses = $classes->count();
+       $totalElevesCarte = $totalEleves;
         return view('dashboard.index', compact(
             'user', 'totalEleves', 'totalAttendu', 'totalCollecte',
             'tauxRecouvrement', 'elevesImpayes', 'statsClasses',

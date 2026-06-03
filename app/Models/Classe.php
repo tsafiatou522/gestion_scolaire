@@ -10,33 +10,55 @@ class Classe extends Model
 {
     protected $table = 'classes';
 
-    protected $fillable = ['nom', 'niveau', 'annee_scolaire'];
+    protected $fillable = [
+        'nom',
+        'niveau',
+        'annee_scolaire'
+    ];
 
+    /**
+     * Élèves de la classe
+     */
     public function eleves(): HasMany
     {
         return $this->hasMany(Eleve::class);
     }
 
+    /**
+     * Matières de la classe
+     */
     public function matieres(): HasMany
     {
         return $this->hasMany(Matiere::class);
     }
 
+    /**
+     * Frais de scolarité
+     */
     public function fraisScolarite(): HasOne
     {
         return $this->hasOne(FraisScolarite::class);
     }
 
-    // Nombre d'élèves inscrits
+    /**
+     * Nombre d'élèves
+     */
     public function getNbElevesAttribute(): int
     {
+        if ($this->relationLoaded('eleves')) {
+            return $this->eleves->count();
+        }
+
         return $this->eleves()->count();
     }
 
-    // Total des frais attendus pour cette classe
+    /**
+     * Total attendu
+     */
     public function getTotalAttenduAttribute(): float
     {
-        $frais = $this->fraisScolarite;
-        return $frais ? $frais->montant * $this->nb_eleves : 0;
+        $montant = $this->fraisScolarite?->montant ?? 0;
+
+        return $montant * $this->nb_eleves;
     }
 }

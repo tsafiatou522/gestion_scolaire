@@ -9,43 +9,93 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Eleve extends Model
 {
     protected $fillable = [
-        'nom', 'prenom', 'date_naissance', 'sexe',
-        'photo', 'nom_parent', 'telephone_parent', 'classe_id'
+        'nom',
+        'prenom',
+        'date_naissance',
+        'sexe',
+        'photo',
+        'nom_parent',
+        'telephone_parent',
+        'classe_id'
     ];
 
-    protected $casts = ['date_naissance' => 'date'];
+    protected $casts = [
+        'date_naissance' => 'date',
+    ];
 
+    /**
+     * Classe de l'élève
+     */
     public function classe(): BelongsTo
     {
         return $this->belongsTo(Classe::class);
     }
 
+    /**
+     * Paiements de l'élève
+     */
     public function paiements(): HasMany
     {
         return $this->hasMany(Paiement::class);
     }
 
+    /**
+     * Notes de l'élève
+     */
     public function notes(): HasMany
     {
         return $this->hasMany(Note::class);
     }
 
-    // Nom complet
+    /**
+     * Nom complet
+     */
     public function getNomCompletAttribute(): string
     {
-        return $this->prenom . ' ' . $this->nom;
+        return trim($this->prenom . ' ' . $this->nom);
     }
 
-    // Total versé par cet élève
+    /**
+     * Total versé
+     */
     public function getTotalVerseAttribute(): float
     {
-        return $this->paiements()->sum('montant_verse');
+        if ($this->relationLoaded('paiements')) {
+            return (float) $this->paiements->sum('montant_verse');
+        }
+
+        return (float) $this->paiements()->sum('montant_verse');
     }
 
-    // Reste à payer
-    public function getResteAPayer(): float
+    /**
+     * Montant des frais scolaires
+     */
+    public function getMontantDuAttribute(): float
     {
-        $frais = $this->classe?->fraisScolarite?->montant ?? 0;
-        return max(0, $frais - $this->total_verse);
+        return (float) ($this->classe?->fraisScolarite?->montant ?? 0);
+    }
+
+    /**
+     * Reste à payer
+     */
+    public function getResteAPayerAttribute(): float
+    {
+        return max(0, $this->montant_du - $this->total_verse);
+    }
+
+    /**
+     * Statut de paiement
+     */
+    public function getStatutPaiementAttribute(): string
+    {
+        if ($this->total_verse >= $this->montant_du) {
+            return 'Payé';
+        }
+
+        if ($this->total_verse > 0) {
+            return 'Partiel';
+        }
+
+        return 'Impayé';
     }
 }

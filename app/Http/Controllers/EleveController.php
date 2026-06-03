@@ -121,17 +121,20 @@ class EleveController extends Controller
     }
 
     public function destroy(Eleve $eleve)
-    {
-        // 🔹 Journalisation suppression (avant delete)
-        Activity::create([
-            'action'  => 'Élève supprimé',
-            'details' => "Nom: {$eleve->nom}, Classe: {$eleve->classe->nom}",
-            'user_id' => auth()->id(),
-        ]);
+{
+    // Charger la relation classe avant suppression
+    $eleve->load('classe');
 
-        $eleve->delete();
+    Activity::create([
+        'action'  => 'Élève supprimé',
+        'details' => "Nom: {$eleve->nom}, Classe: " . ($eleve->classe?->nom ?? 'Non attribuée'),
+        'user_id' => auth()->id(),
+    ]);
 
-        return redirect()->route('eleves.index')
-                         ->with('success', 'Élève supprimé avec succès.');
-    }
+    $eleve->delete();
+
+    return redirect()->route('eleves.index')
+                     ->with('success', 'Élève supprimé avec succès.');
+}
+
 }

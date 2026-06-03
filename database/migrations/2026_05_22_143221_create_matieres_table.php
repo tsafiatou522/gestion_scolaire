@@ -7,19 +7,16 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('paiements', function (Blueprint $table) {
+        Schema::create('matieres', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('eleve_id')->constrained('eleves')->onDelete('cascade');
-            $table->decimal('montant_verse', 10, 2);
-            $table->date('date_paiement');
-            $table->string('recu_pdf')->nullable(); // chemin du fichier PDF généré
-            $table->text('observation')->nullable();
+            $table->string('nom'); // Nom de la matière (ex: Mathématiques, Français)
+            $table->string('code')->nullable(); // Code (ex: MATH, FR)
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('paiements');
+        Schema::dropIfExists('matieres');
     }
 };

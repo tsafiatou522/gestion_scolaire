@@ -7,17 +7,20 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::create('matieres', function (Blueprint $table) {
+        Schema::create('paiements', function (Blueprint $table) {
             $table->id();
-            $table->string('nom'); // Français, Maths, Sciences, etc.
-            $table->foreignId('classe_id')->constrained('classes')->onDelete('cascade');
-            $table->decimal('coefficient', 4, 2)->default(1);
+            $table->foreignId('eleve_id')->constrained('eleves')->onDelete('cascade');
+            $table->decimal('montant_verse', 10, 2); // On garde montant_verse si tes contrôleurs l'utilisent
+            $table->date('date_paiement');
+            $table->string('mode')->nullable(); // Espèces, Mobile Money, etc.
+            $table->string('recu_pdf')->nullable(); 
+            $table->text('observation')->nullable();
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('matieres');
+        Schema::dropIfExists('paiements');
     }
 };
