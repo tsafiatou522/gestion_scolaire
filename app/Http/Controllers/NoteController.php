@@ -9,6 +9,7 @@ use App\Models\Matiere;
 use App\Services\MoyenneService;
 use App\Services\PdfService;
 use Illuminate\Http\Request;
+use App\Models\Activity; // 🔹 Import du modèle Activity
 
 class NoteController extends Controller
 {
@@ -73,7 +74,7 @@ class NoteController extends Controller
             foreach ($matieres as $matiereId => $valeur) {
                 if ($valeur === null || $valeur === '') continue;
 
-                Note::updateOrCreate(
+                $note = Note::updateOrCreate(
                     [
                         'eleve_id'       => $eleveId,
                         'matiere_id'     => $matiereId,
@@ -82,6 +83,16 @@ class NoteController extends Controller
                     ],
                     ['note' => $valeur]
                 );
+
+                // 🔹 Journalisation de l'ajout ou modification de note
+                $eleve   = Eleve::find($eleveId);
+                $matiere = Matiere::find($matiereId);
+
+                Activity::create([
+                    'action'  => 'Note enregistrée',
+                    'details' => "Élève: {$eleve->nom}, Matière: {$matiere->nom}, Note: {$valeur}, Trimestre: {$trimestre}, Année: {$anneeScolaire}",
+                    'user_id' => auth()->id(),
+                ]);
             }
         }
 
@@ -115,6 +126,14 @@ class NoteController extends Controller
     public function bulletin(Eleve $eleve, int $trimestre, string $anneeScolaire)
     {
         $chemin = $this->pdfService->genererBulletin($eleve, $trimestre, $anneeScolaire);
+
+        // 🔹 Journalisation génération bulletin
+        Activity::create([
+            'action'  => 'Bulletin généré',
+            'details' => "Élève: {$eleve->nom}, Trimestre: {$trimestre}, Année: {$anneeScolaire}",
+            'user_id' => auth()->id(),
+        ]);
+
         return \Storage::disk('public')->download($chemin);
     }
 }

@@ -3,20 +3,21 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ApeCotisation extends Model
 {
-    protected $table = 'ape_cotisations';
-
+    // Colonnes autorisées à l'insertion/mise à jour
     protected $fillable = [
-        'eleve_id', 'montant', 'date_paiement',
-        'annee_scolaire', 'recu_pdf', 'observation'
+        'eleve_id',
+        'montant',
+        'date_paiement',
+        'annee_scolaire',
+        'observation',
+        'recu_pdf',
     ];
 
-    protected $casts = ['date_paiement' => 'date'];
-
-    public function eleve(): BelongsTo
+    // Relation : une cotisation appartient à un élève
+    public function eleve()
     {
         return $this->belongsTo(Eleve::class);
     }

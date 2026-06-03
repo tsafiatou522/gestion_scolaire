@@ -121,19 +121,20 @@ class DashboardController extends Controller
         for ($i = 5; $i >= 0; $i--) {
             $mois = Carbon::now()->subMonths($i);
             $moisLabels[] = $mois->format('m/Y');
+            /** @var \Carbon\Carbon $mois */
             $moisData[]   = Paiement::whereYear('date_paiement', $mois->year)
                 ->whereMonth('date_paiement', $mois->month)
                 ->sum('montant_verse');
         }
 
         // === Ajout APE et Carte scolaire ===
-        $totalCotisationsAPE = Cotisation::sum('montant');
-        $cotisationsRecentes = Cotisation::with('eleve')
+        $totalCotisationsAPE = ApeCotisation::sum('montant');
+        $cotisationsRecentes = ApeCotisation::with('eleve')
             ->orderByDesc('created_at')
             ->take(5)
             ->get();
 
-        $totalMembresAPE = MembreAPE::count();
+        $totalMembresAPE = ApeMembre::count();
         $totalClasses    = Classe::count();
         $totalElevesCarte = Eleve::count();
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Activity; // 🔹 Import du modèle Activity
 
 class UserController extends Controller
 {
@@ -29,7 +30,14 @@ class UserController extends Controller
         ]);
 
         $data['password'] = Hash::make($data['password']);
-        User::create($data);
+        $user = User::create($data);
+
+        // 🔹 Journalisation création
+        Activity::create([
+            'action'  => 'Utilisateur créé',
+            'details' => "Nom: {$user->name}, Email: {$user->email}, Rôle: {$user->role}",
+            'user_id' => auth()->id(),
+        ]);
 
         return redirect()->route('users.index')->with('success', 'Utilisateur créé avec succès.');
     }
@@ -52,6 +60,14 @@ class UserController extends Controller
         }
 
         $user->update($data);
+
+        // 🔹 Journalisation modification
+        Activity::create([
+            'action'  => 'Utilisateur modifié',
+            'details' => "Nom: {$user->name}, Email: {$user->email}, Rôle: {$user->role}",
+            'user_id' => auth()->id(),
+        ]);
+
         return redirect()->route('users.index')->with('success', 'Utilisateur mis à jour.');
     }
 
@@ -60,7 +76,16 @@ class UserController extends Controller
         if ($user->id === auth()->id()) {
             return back()->with('error', 'Vous ne pouvez pas supprimer votre propre compte.');
         }
+
+        // 🔹 Journalisation suppression (avant delete)
+        Activity::create([
+            'action'  => 'Utilisateur supprimé',
+            'details' => "Nom: {$user->name}, Email: {$user->email}, Rôle: {$user->role}",
+            'user_id' => auth()->id(),
+        ]);
+
         $user->delete();
+
         return redirect()->route('users.index')->with('success', 'Utilisateur supprimé.');
     }
 }

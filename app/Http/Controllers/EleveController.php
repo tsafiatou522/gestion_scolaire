@@ -8,6 +8,7 @@ use App\Services\PaiementService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Historique;
+use App\Models\Activity; // 🔹 Import du modèle Activity
 
 class EleveController extends Controller
 {
@@ -34,35 +35,43 @@ class EleveController extends Controller
         return view('eleves.create', compact('classes'));
     }
 
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'nom'              => 'required|string|max:100',
+            'prenom'           => 'required|string|max:100',
+            'date_naissance'   => 'required|date',
+            'sexe'             => 'required|in:M,F',
+            'classe_id'        => 'required|exists:classes,id',
+            'nom_parent'       => 'nullable|string|max:100',
+            'telephone_parent' => 'nullable|string|max:20',
+            'photo'            => 'nullable|image|max:2048',
+        ]);
 
-public function store(Request $request)
-{
-    $data = $request->validate([
-        'nom'              => 'required|string|max:100',
-        'prenom'           => 'required|string|max:100',
-        'date_naissance'   => 'required|date',
-        'sexe'             => 'required|in:M,F',
-        'classe_id'        => 'required|exists:classes,id',
-        'nom_parent'       => 'nullable|string|max:100',
-        'telephone_parent' => 'nullable|string|max:20',
-        'photo'            => 'nullable|image|max:2048',
-    ]);
+        if ($request->hasFile('photo')) {
+            $data['photo'] = $request->file('photo')->store('photos', 'public');
+        }
 
-    if ($request->hasFile('photo')) {
-        $data['photo'] = $request->file('photo')->store('photos', 'public');
+        $eleve = Eleve::create($data);
+
+        // 🔹 Historique interne
+        Historique::create([
+            'utilisateur' => auth()->user()->name,
+            'action'      => 'Ajout élève',
+            'description' => 'Nouvel élève enregistré : ' . $eleve->nom . ' ' . $eleve->prenom,
+        ]);
+
+        // 🔹 Journalisation pour le directeur
+        Activity::create([
+            'action'  => 'Élève inscrit',
+            'details' => "Nom: {$eleve->nom}, Classe: {$eleve->classe->nom}",
+            'user_id' => auth()->id(),
+        ]);
+
+        return redirect()->route('eleves.index')
+                         ->with('success', 'Élève inscrit avec succès.');
     }
 
-    $eleve = Eleve::create($data);
-
-    Historique::create([
-        'utilisateur' => auth()->user()->name,
-        'action'      => 'Ajout élève',
-        'description' => 'Nouvel élève enregistré : ' . $eleve->nom . ' ' . $eleve->prenom,
-    ]);
-
-    return redirect()->route('eleves.index')
-                     ->with('success', 'Élève inscrit avec succès.');
-}
     public function show(Eleve $eleve)
     {
         $eleve->load('classe', 'paiements', 'notes.matiere');
@@ -71,7 +80,6 @@ public function store(Request $request)
         $montantDu   = $this->paiementService->montantDu($eleve);
 
         return view('eleves.show', compact('eleve', 'resteAPayer', 'totalVerse', 'montantDu'));
-        
     }
 
     public function edit(Eleve $eleve)
@@ -102,15 +110,28 @@ public function store(Request $request)
 
         $eleve->update($data);
 
+        // 🔹 Journalisation modification
+        Activity::create([
+            'action'  => 'Élève modifié',
+            'details' => "Nom: {$eleve->nom}, Classe: {$eleve->classe->nom}",
+            'user_id' => auth()->id(),
+        ]);
+
         return redirect()->route('eleves.show', $eleve)->with('success', 'Élève mis à jour.');
     }
 
-   public function destroy(Eleve $eleve)
-{
-    $eleve->delete();
+    public function destroy(Eleve $eleve)
+    {
+        // 🔹 Journalisation suppression (avant delete)
+        Activity::create([
+            'action'  => 'Élève supprimé',
+            'details' => "Nom: {$eleve->nom}, Classe: {$eleve->classe->nom}",
+            'user_id' => auth()->id(),
+        ]);
 
-    return redirect()->route('eleves.index')
-                     ->with('success', 'Élève supprimé avec succès.');
-}
+        $eleve->delete();
 
+        return redirect()->route('eleves.index')
+                         ->with('success', 'Élève supprimé avec succès.');
+    }
 }

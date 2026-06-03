@@ -8,6 +8,8 @@ use App\Services\PaiementService;
 use App\Services\PdfService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Activity;
+
 
 class PaiementController extends Controller
 {
@@ -52,6 +54,12 @@ class PaiementController extends Controller
         // Génération automatique du reçu PDF
         $cheminPdf = $this->pdfService->genererRecuPaiement($paiement);
         $paiement->update(['recu_pdf' => $cheminPdf]);
+        
+Activity::create([
+    'action'  => 'Paiement enregistré',
+    'details' => "Élève: {$paiement->eleve->nom}, Montant: {$paiement->montant_verse}",
+    'user_id' => auth()->id(),
+]);
 
         return redirect()
             ->route('paiements.show', $paiement)
@@ -87,4 +95,5 @@ class PaiementController extends Controller
         $paiement->delete();
         return redirect()->route('paiements.index')->with('success', 'Paiement supprimé.');
     }
+    
 }

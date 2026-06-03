@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Classe;
 use App\Models\FraisScolarite;
 use Illuminate\Http\Request;
+use App\Models\Activity; // 🔹 Import du modèle Activity
 
 class ClasseController extends Controller
 {
@@ -40,6 +41,13 @@ class ClasseController extends Controller
             'annee_scolaire' => $data['annee_scolaire'],
         ]);
 
+        // 🔹 Journalisation création
+        Activity::create([
+            'action'  => 'Classe créée',
+            'details' => "Nom: {$classe->nom}, Niveau: {$classe->niveau}, Année: {$classe->annee_scolaire}",
+            'user_id' => auth()->id(),
+        ]);
+
         return redirect()->route('classes.index')->with('success', 'Classe créée avec succès.');
     }
 
@@ -62,12 +70,27 @@ class ClasseController extends Controller
             ['montant' => $data['montant_frais']]
         );
 
+        // 🔹 Journalisation modification
+        Activity::create([
+            'action'  => 'Classe modifiée',
+            'details' => "Nom: {$classe->nom}, Niveau: {$classe->niveau}, Année: {$classe->annee_scolaire}",
+            'user_id' => auth()->id(),
+        ]);
+
         return redirect()->route('classes.index')->with('success', 'Classe mise à jour.');
     }
 
     public function destroy(Classe $classe)
     {
+        // 🔹 Journalisation suppression (avant delete)
+        Activity::create([
+            'action'  => 'Classe supprimée',
+            'details' => "Nom: {$classe->nom}, Niveau: {$classe->niveau}, Année: {$classe->annee_scolaire}",
+            'user_id' => auth()->id(),
+        ]);
+
         $classe->delete();
+
         return redirect()->route('classes.index')->with('success', 'Classe supprimée.');
     }
 }

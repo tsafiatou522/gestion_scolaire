@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Matiere;
 use App\Models\Classe;
 use Illuminate\Http\Request;
+use App\Models\Activity; // 🔹 Import du modèle Activity
 
 class MatiereController extends Controller
 {
@@ -38,7 +39,14 @@ class MatiereController extends Controller
             'coefficient' => 'required|numeric|min:0.5|max:10',
         ]);
 
-        Matiere::create($data);
+        $matiere = Matiere::create($data);
+
+        // 🔹 Journalisation création
+        Activity::create([
+            'action'  => 'Matière créée',
+            'details' => "Nom: {$matiere->nom}, Classe ID: {$matiere->classe_id}, Coefficient: {$matiere->coefficient}",
+            'user_id' => auth()->id(),
+        ]);
 
         return redirect()
             ->route('matieres.index', ['classe_id' => $data['classe_id']])
@@ -60,6 +68,13 @@ class MatiereController extends Controller
 
         $matiere->update($data);
 
+        // 🔹 Journalisation modification
+        Activity::create([
+            'action'  => 'Matière modifiée',
+            'details' => "Nom: {$matiere->nom}, Classe ID: {$matiere->classe_id}, Coefficient: {$matiere->coefficient}",
+            'user_id' => auth()->id(),
+        ]);
+
         return redirect()
             ->route('matieres.index', ['classe_id' => $matiere->classe_id])
             ->with('success', 'Matière mise à jour.');
@@ -67,6 +82,13 @@ class MatiereController extends Controller
 
     public function destroy(Matiere $matiere)
     {
+        // 🔹 Journalisation suppression (avant delete)
+        Activity::create([
+            'action'  => 'Matière supprimée',
+            'details' => "Nom: {$matiere->nom}, Classe ID: {$matiere->classe_id}, Coefficient: {$matiere->coefficient}",
+            'user_id' => auth()->id(),
+        ]);
+
         $classeId = $matiere->classe_id;
         $matiere->delete();
 
