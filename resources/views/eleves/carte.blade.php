@@ -136,31 +136,33 @@
         display: none !important;
     }
 
-    body {
+    html, body {
         background: white !important;
         margin: 0 !important;
+        padding: 0 !important;
     }
 
     .d-flex {
         display: block !important;
     }
 
-    .main-content, .p-4 {
+    .main-content, .p-4, .container {
         padding: 0 !important;
         margin: 0 !important;
+        background: white !important;
     }
 
     .container {
         max-width: 100% !important;
-        padding: 0 !important;
         margin: 0 !important;
     }
 
     .carte-scolaire {
-        margin: 10mm auto !important;
+        margin: 20mm auto !important;
         box-shadow: none !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
+        page-break-inside: avoid;
     }
 
     @page {

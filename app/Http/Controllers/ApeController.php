@@ -128,7 +128,7 @@ class ApeController extends Controller
         $chemin = $this->genererRecuApePdf($cotisation);
         $cotisation->update(['recu_pdf' => $chemin]);
 
-        return redirect()->route('cotisations.index')
+        return redirect()->route('ape.cotisations.index')
             ->with('success', 'Cotisation APE enregistrée. Reçu généré.');
     }
 
@@ -138,7 +138,7 @@ class ApeController extends Controller
             Storage::disk('public')->delete($cotisation->recu_pdf);
         }
         $cotisation->delete();
-        return redirect()->route('cotisations.index')
+        return redirect()->route('ape.cotisations.index')
             ->with('success', 'Cotisation supprimée.');
     }
 

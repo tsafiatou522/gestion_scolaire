@@ -7,136 +7,19 @@
     <title>@yield('title', 'Gestion Scolaire') — {{ config('app.school_name') }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-body{
-    background:#f4f7fb;
-    font-family:'Segoe UI',sans-serif;
-}
-
-.sidebar{
-    min-height:100vh;
-    background:linear-gradient(180deg,#0f172a,#1e293b);
-    color:#fff;
-    box-shadow:4px 0 15px rgba(0,0,0,.08);
-}
-
-.sidebar .nav-link{
-    color:rgba(255,255,255,.75);
-    padding:.75rem 1rem;
-    border-radius:12px;
-    margin-bottom:5px;
-    transition:.3s;
-}
-
-.sidebar .nav-link:hover,
-.sidebar .nav-link.active{
-    background:rgba(255,255,255,.15);
-    color:#fff;
-    transform:translateX(5px);
-}
-
-.sidebar .nav-link i{
-    width:20px;
-}
-
-.sidebar .sidebar-heading{
-    font-size: 10px;
-    text-uppercase: uppercase;
-    letter-spacing: 1px;
-    color: rgba(255,255,255,0.4);
-    margin-top: 15px;
-    margin-bottom: 5px;
-    padding-left: 10px;
-    font-weight: 700;
-}
-
-.main-content{
-    padding:0;
-    /* Correction : Empêche le contenu de pousser le layout général */
-    overflow-x: hidden; 
-}
-
-.card{
-    border:none;
-    border-radius:18px;
-    box-shadow:0 4px 15px rgba(0,0,0,.06);
-    margin-bottom: 1.5rem;
-}
-
-.stat-card{
-    border:none;
-    color:white;
-    transition:.3s;
-}
-
-.stat-card:hover{
-    transform:translateY(-4px);
-}
-
-.primary{
-    background:linear-gradient(135deg,#4f46e5,#6366f1);
-}
-
-.success{
-    background:linear-gradient(135deg,#059669,#10b981);
-}
-
-.warning{
-    background:linear-gradient(135deg,#d97706,#f59e0b);
-}
-
-.danger{
-    background:linear-gradient(135deg,#dc2626,#ef4444);
-}
-
-.stat-card .text-muted{
-    color:rgba(255,255,255,.85)!important;
-}
-
-/* ======================================================= */
-/* CORRECTIF GLOBAL POUR TOUS LES TABLEAUX DU PROJET       */
-/* ======================================================= */
-.table {
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-.table thead {
-    background: #f8fafc;
-}
-
-.table th {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 600;
-    padding: 12px 16px !important;
-}
-
-.table td {
-    padding: 14px 16px !important;
-    font-size: 13.5px;
-}
-
-.table-hover tbody tr:hover {
-    background: #eef4ff;
-}
-
-/* Sécurité anti-débordement sur les cartes contenant des tables */
-.card .table-responsive {
-    border: none;
-    margin: 0;
-}
-/* ======================================================= */
-</style>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
 <body>
 <div class="d-flex">
     <div class="sidebar p-3 d-flex flex-column" style="width:240px; min-width:240px;">
+        <div class="text-center mb-3">
+            <div style="font-size: 48px; margin-bottom: 0.5rem;">📚</div>
+        </div>
         <div class="mb-4 mt-1">
             <h6 class="fw-bold text-white mb-0">{{ config('app.school_name') }}</h6>
             <small class="text-white-50">Gestion Scolarité</small>
+            <div class="sidebar-devise">✨ Excellence - Intégrité - Succès</div>
         </div>
 
         <nav class="nav flex-column">

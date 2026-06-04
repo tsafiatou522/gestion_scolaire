@@ -56,14 +56,18 @@ class MatiereController extends Controller
             $classe->matieres()->attach($matiere->id, ['coefficient' => $coefficient]);
         } else {
             // Mettre à jour le coefficient si déjà attachée
-            $classe->matieres()->updateExistingPivot($matiere->id, ['coefficient' => $coefficient]);
+            $classe->matieres()->sync([
+                $matiere->id => ['coefficient' => $coefficient]
+            ]);
         }
 
-        Activity::create([
-            'action'  => 'Matière créée',
-            'details' => "Nom: {$matiere->nom}, Classe ID: {$classeId}, Coefficient: {$coefficient}",
-            'user_id' => auth()->id(),
-        ]);
+        if (auth()->check()) {
+            Activity::create([
+                'action'  => 'Matière créée',
+                'details' => "Nom: {$matiere->nom}, Classe ID: {$classeId}, Coefficient: {$coefficient}",
+                'user_id' => auth()->id(),
+            ]);
+        }
 
         return redirect()
             ->route('matieres.index', ['classe_id' => $classeId])
@@ -105,13 +109,17 @@ class MatiereController extends Controller
 
         // Mettre à jour le coefficient dans le pivot
         $classe = Classe::findOrFail($classeId);
-        $classe->matieres()->updateExistingPivot($matiere->id, ['coefficient' => $coefficient]);
-
-        Activity::create([
-            'action'  => 'Matière modifiée',
-            'details' => "Nom: {$matiere->nom}, Classe ID: {$classeId}, Coefficient: {$coefficient}",
-            'user_id' => auth()->id(),
+        $classe->matieres()->sync([
+            $matiere->id => ['coefficient' => $coefficient]
         ]);
+
+        if (auth()->check()) {
+            Activity::create([
+                'action'  => 'Matière modifiée',
+                'details' => "Nom: {$matiere->nom}, Classe ID: {$classeId}, Coefficient: {$coefficient}",
+                'user_id' => auth()->id(),
+            ]);
+        }
 
         return redirect()
             ->route('matieres.index', ['classe_id' => $classeId])
@@ -122,11 +130,13 @@ class MatiereController extends Controller
     {
         $classeId = $request->get('classe_id') ? (int) $request->get('classe_id') : null;
 
-        Activity::create([
-            'action'  => 'Matière supprimée',
-            'details' => "Nom: {$matiere->nom}, Classe ID: {$classeId}",
-            'user_id' => auth()->id(),
-        ]);
+        if (auth()->check()) {
+            Activity::create([
+                'action'  => 'Matière supprimée',
+                'details' => "Nom: {$matiere->nom}, Classe ID: {$classeId}",
+                'user_id' => auth()->id(),
+            ]);
+        }
 
         if ($classeId) {
             // Détacher uniquement de cette classe
