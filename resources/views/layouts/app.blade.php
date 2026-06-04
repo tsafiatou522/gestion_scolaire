@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Gestion Scolaire') — École Primaire</title>
+    <title>@yield('title', 'Gestion Scolaire') — {{ config('app.school_name') }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
-   <style>
+    <style>
 body{
     background:#f4f7fb;
     font-family:'Segoe UI',sans-serif;
@@ -39,14 +39,28 @@ body{
     width:20px;
 }
 
+.sidebar .sidebar-heading{
+    font-size: 10px;
+    text-uppercase: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 15px;
+    margin-bottom: 5px;
+    padding-left: 10px;
+    font-weight: 700;
+}
+
 .main-content{
     padding:0;
+    /* Correction : Empêche le contenu de pousser le layout général */
+    overflow-x: hidden; 
 }
 
 .card{
     border:none;
     border-radius:18px;
     box-shadow:0 4px 15px rgba(0,0,0,.06);
+    margin-bottom: 1.5rem;
 }
 
 .stat-card{
@@ -79,26 +93,49 @@ body{
     color:rgba(255,255,255,.85)!important;
 }
 
-.table{
-    border-radius:12px;
-    overflow:hidden;
+/* ======================================================= */
+/* CORRECTIF GLOBAL POUR TOUS LES TABLEAUX DU PROJET       */
+/* ======================================================= */
+.table {
+    border-radius: 12px;
+    overflow: hidden;
 }
 
-.table thead{
-    background:#f8fafc;
+.table thead {
+    background: #f8fafc;
 }
 
-.table-hover tbody tr:hover{
-    background:#eef4ff;
+.table th {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    padding: 12px 16px !important;
 }
+
+.table td {
+    padding: 14px 16px !important;
+    font-size: 13.5px;
+}
+
+.table-hover tbody tr:hover {
+    background: #eef4ff;
+}
+
+/* Sécurité anti-débordement sur les cartes contenant des tables */
+.card .table-responsive {
+    border: none;
+    margin: 0;
+}
+/* ======================================================= */
 </style>
     @stack('styles')
 </head>
 <body>
 <div class="d-flex">
-    <div class="sidebar p-3" style="width:240px; min-width:240px;">
+    <div class="sidebar p-3 d-flex flex-column" style="width:240px; min-width:240px;">
         <div class="mb-4 mt-1">
-            <h6 class="fw-bold text-white mb-0">École Primaire</h6>
+            <h6 class="fw-bold text-white mb-0">{{ config('app.school_name') }}</h6>
             <small class="text-white-50">Gestion Scolarité</small>
         </div>
 
@@ -138,7 +175,20 @@ body{
             </a>
             @endif
 
+            <div class="sidebar-heading">Association Parents (APE)</div>
+            
+            <a href="{{ route('ape.membres.index') }}"
+               class="nav-link {{ request()->routeIs('ape.membres.*') ? 'active' : '' }}">
+                <i class="bi bi-person-badge-fill me-2"></i> Membres Bureau
+            </a>
+            
+            <a href="{{ route('ape.cotisations.index') }}"
+               class="nav-link {{ request()->routeIs('ape.cotisations.*') ? 'active' : '' }}">
+                <i class="bi bi-piggy-bank-fill me-2"></i> Cotisations APE
+            </a>
+
             @if(auth()->user()->isDirecteur() || auth()->user()->isEnseignant())
+            <div class="sidebar-heading">Pédagogie</div>
             <a href="{{ route('matieres.index') }}"
                class="nav-link {{ request()->routeIs('matieres.*') ? 'active' : '' }}">
                 <i class="bi bi-book me-2"></i> Matières
@@ -150,6 +200,7 @@ body{
             @endif
 
             @if(auth()->user()->isDirecteur())
+            <div class="sidebar-heading">Administration</div>
             <a href="{{ route('users.index') }}"
                class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
                 <i class="bi bi-people-fill me-2"></i> Utilisateurs
@@ -185,7 +236,6 @@ body{
     </div>
 
     <div class="main-content flex-grow-1">
-        {{-- Barre de recherche globale --}}
         <div class="bg-white border-bottom px-4 py-2 d-flex align-items-center gap-3">
             <form method="GET" action="{{ route('recherche.index') }}" class="d-flex gap-2 w-100" style="max-width:500px">
                 <input type="text" name="q" class="form-control form-control-sm"
@@ -211,7 +261,8 @@ body{
             </div>
         @endif
 
-        <div class="p-4">
+        {{-- Correction ici : Enveloppement fluide --}}
+        <div class="p-4 container-fluid">
             @yield('content')
         </div>
     </div>

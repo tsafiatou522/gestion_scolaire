@@ -6,7 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class ApeCotisation extends Model
 {
-    // Colonnes autorisées à l'insertion/mise à jour
+    protected $casts = [
+        'date_paiement' => 'date',
+    ];
+
     protected $fillable = [
         'eleve_id',
         'montant',
@@ -16,7 +19,6 @@ class ApeCotisation extends Model
         'recu_pdf',
     ];
 
-    // Relation : une cotisation appartient à un élève
     public function eleve()
     {
         return $this->belongsTo(Eleve::class);

@@ -62,9 +62,9 @@
             @foreach($notes as $note)
             <tr>
                 <td>{{ $note->matiere->nom }}</td>
-                <td style="text-align:center">{{ $note->matiere->coefficient }}</td>
+                <td style="text-align:center">{{ $note->coefficient }}</td>
                 <td style="text-align:center;font-weight:bold">{{ $note->note }}</td>
-                <td style="text-align:center">{{ $note->note * $note->matiere->coefficient }}</td>
+                <td style="text-align:center">{{ number_format($note->note * $note->coefficient, 2) }}</td>
             </tr>
             @endforeach
         </tbody>

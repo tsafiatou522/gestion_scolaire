@@ -7,9 +7,11 @@
         <i class="bi bi-people-fill me-2 text-primary"></i>
         Association des Parents d'Élèves (APE)
     </h4>
+    @if(auth()->user()->isDirecteur())
     <a href="{{ route('ape.membres.create') }}" class="btn btn-primary btn-sm">
         <i class="bi bi-plus-lg me-1"></i> Ajouter un membre
     </a>
+    @endif
 </div>
 
 {{-- Filtre année scolaire --}}
@@ -26,69 +28,82 @@
     </form>
 </div>
 
-<div class="card">
-    <table class="table table-hover mb-0 align-middle">
-        <thead class="table-light">
-            <tr>
-                <th>Nom & Prénom</th>
-                <th>Fonction</th>
-                <th>Téléphone</th>
-                <th>Email</th>
-                <th>Élève lié</th>
-                <th class="text-center">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($membres as $membre)
-            <tr>
-                <td class="fw-semibold">{{ $membre->nom_complet }}</td>
-                <td>
-                    @php
-                        $colors = [
-                            'president'      => 'danger',
-                            'vice_president' => 'warning',
-                            'secretaire'     => 'info',
-                            'tresorier'      => 'success',
-                            'membre'         => 'secondary',
-                        ];
-                    @endphp
-                    <span class="badge bg-{{ $colors[$membre->fonction] }}">
-                        {{ $membre->fonction_label }}
-                    </span>
-                </td>
-                <td class="text-muted small">{{ $membre->telephone ?? '—' }}</td>
-                <td class="text-muted small">{{ $membre->email ?? '—' }}</td>
-                <td>
-                    @if($membre->eleve)
-                        <span class="badge bg-primary">{{ $membre->eleve->nom_complet }}</span>
-                    @else
-                        <span class="text-muted small">—</span>
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle text-nowrap">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Nom & Prénom</th>
+                    <th>Fonction</th>
+                    <th>Téléphone</th>
+                    <th>Email</th>
+                    <th>Élève lié</th>
+                    @if(auth()->user()->isDirecteur())<th class="text-center pe-4">Actions</th>@endif
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($membres as $membre)
+                <tr>
+                    {{-- Utilisation sécurisée de l'Accessor nom_complet --}}
+                    <td class="ps-4 fw-semibold text-uppercase">
+                        {{ $membre->nom_complet ?? ($membre->nom . ' ' . $membre->prenom) }}
+                    </td>
+                    <td>
+                        @php
+                            $colors = [
+                                'president'      => 'danger',
+                                'vice_president' => 'warning',
+                                'secretaire'     => 'info',
+                                'tresorier'      => 'success',
+                                'membre'         => 'secondary',
+                            ];
+                        @endphp
+                        {{-- Fallback si fonction_label n'est pas encore écrit dans le modèle --}}
+                        <span class="badge bg-{{ $colors[$membre->fonction] ?? 'secondary' }}">
+                            {{ $membre->fonction_label ?? ucfirst(str_replace('_', ' ', $membre->fonction)) }}
+                        </span>
+                    </td>
+                    <td class="text-muted small">{{ $membre->telephone ?? '—' }}</td>
+                    <td class="text-muted small">{{ $membre->email ?? '—' }}</td>
+                    <td>
+                        @if($membre->eleve)
+                            <span class="badge bg-primary">
+                                {{ $membre->eleve->nom }} {{ $membre->eleve->prenom }}
+                                @if($membre->eleve->classe)
+                                    <small class="text-white-50">({{ $membre->eleve->classe->nom }})</small>
+                                @endif
+                            </span>
+                        @else
+                            <span class="text-muted small">—</span>
+                        @endif
+                    </td>
+                    @if(auth()->user()->isDirecteur())
+                    <td class="text-center pe-4">
+                        <a href="{{ route('ape.membres.edit', $membre) }}"
+                           class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <form action="{{ route('ape.membres.destroy', $membre) }}"
+                              method="POST" class="d-inline"
+                              onsubmit="return confirm('Supprimer ce membre ?')">
+                            @csrf @method('DELETE')
+                            <button class="btn btn-sm btn-outline-danger ms-1">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
                     @endif
-                </td>
-                <td class="text-center">
-                    <a href="{{ route('ape.membres.edit', $membre) }}"
-                       class="btn btn-sm btn-outline-secondary">
-                        <i class="bi bi-pencil"></i>
-                    </a>
-                    <form action="{{ route('ape.membres.destroy', $membre) }}"
-                          method="POST" class="d-inline"
-                          onsubmit="return confirm('Supprimer ce membre ?')">
-                        @csrf @method('DELETE')
-                        <button class="btn btn-sm btn-outline-danger">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </form>
-                </td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="6" class="text-center text-muted py-4">
-                    Aucun membre APE enregistré.
-                </td>
-            </tr>
-            @endforelse
-        </tbody>
-    </table>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">
+                        Aucun membre APE enregistré pour l'année {{ $anneeScolaire }}.
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <div class="mt-3">

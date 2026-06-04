@@ -4,7 +4,7 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="fw-bold mb-0">Modifier — {{ $matiere->nom }}</h4>
-    <a href="{{ route('matieres.index', ['classe_id' => $matiere->classe_id]) }}"
+    <a href="{{ route('matieres.index', ['classe_id' => $classeId]) }}"
        class="btn btn-outline-secondary btn-sm">
         <i class="bi bi-arrow-left me-1"></i> Retour
     </a>
@@ -14,9 +14,15 @@
     <form method="POST" action="{{ route('matieres.update', $matiere) }}">
         @csrf @method('PUT')
 
+        <input type="hidden" name="classe_id" value="{{ $classeId }}">
+
         <div class="mb-3">
             <label class="form-label fw-semibold">Classe</label>
-            <input type="text" class="form-control" value="{{ $matiere->classe->nom }}" disabled>
+            @foreach($classes as $classe)
+                @if($classe->id == $classeId)
+                    <input type="text" class="form-control" value="{{ $classe->nom }}" disabled>
+                @endif
+            @endforeach
             <small class="text-muted">La classe ne peut pas être modifiée.</small>
         </div>
 
@@ -31,7 +37,7 @@
             <label class="form-label fw-semibold">Coefficient <span class="text-danger">*</span></label>
             <input type="number" name="coefficient"
                    class="form-control @error('coefficient') is-invalid @enderror"
-                   value="{{ old('coefficient', $matiere->coefficient) }}"
+                   value="{{ old('coefficient', $coefficient) }}"
                    min="0.5" max="10" step="0.5" required>
             @error('coefficient')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
@@ -40,7 +46,7 @@
             <button type="submit" class="btn btn-primary">
                 <i class="bi bi-save me-1"></i> Enregistrer
             </button>
-            <a href="{{ route('matieres.index', ['classe_id' => $matiere->classe_id]) }}"
+            <a href="{{ route('matieres.index', ['classe_id' => $classeId]) }}"
                class="btn btn-outline-secondary">Annuler</a>
         </div>
     </form>

@@ -72,20 +72,37 @@
                 <td>{{ $eleve->date_naissance->format('d/m/Y') }}</td>
                 <td class="text-muted small">{{ $eleve->nom_parent ?? '—' }}</td>
                 <td class="text-center">
-                    <a href="{{ route('eleves.show', $eleve) }}" class="btn btn-sm btn-outline-primary">
-                        <i class="bi bi-eye"></i>
-                    </a>
-                    <a href="{{ route('eleves.edit', $eleve) }}" class="btn btn-sm btn-outline-secondary">
-                        <i class="bi bi-pencil"></i>
-                    </a>
-                    <form action="{{ route('eleves.destroy', $eleve) }}" method="POST" class="d-inline"
-                          onsubmit="return confirm('Supprimer cet élève ?')">
-                        @csrf @method('DELETE')
-                        <button class="btn btn-sm btn-outline-danger">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </form>
-                </td>
+    <a href="{{ route('eleves.show', $eleve) }}"
+       class="btn btn-sm btn-outline-primary"
+       title="Voir">
+        <i class="bi bi-eye"></i>
+    </a>
+
+    <a href="{{ route('eleves.edit', $eleve) }}"
+       class="btn btn-sm btn-outline-secondary"
+       title="Modifier">
+        <i class="bi bi-pencil"></i>
+    </a>
+
+    <a href="{{ route('eleves.carte', $eleve) }}"
+       class="btn btn-sm btn-outline-success"
+       title="Carte scolaire">
+        <i class="bi bi-person-vcard"></i>
+    </a>
+
+    <form action="{{ route('eleves.destroy', $eleve) }}"
+          method="POST"
+          class="d-inline"
+          onsubmit="return confirm('Supprimer cet élève ?')">
+        @csrf
+        @method('DELETE')
+
+        <button class="btn btn-sm btn-outline-danger"
+                title="Supprimer">
+            <i class="bi bi-trash"></i>
+        </button>
+    </form>
+</td>
             </tr>
             @empty
             <tr><td colspan="7" class="text-center text-muted py-4">Aucun élève trouvé.</td></tr>

@@ -9,7 +9,7 @@ use App\Models\Matiere;
 use App\Services\MoyenneService;
 use App\Services\PdfService;
 use Illuminate\Http\Request;
-use App\Models\Activity; // 🔹 Import du modèle Activity
+use App\Models\Activity;
 
 class NoteController extends Controller
 {
@@ -23,13 +23,13 @@ class NoteController extends Controller
      */
     public function grilleSaisie(Request $request)
     {
-        $classes = Classe::all();
-        $classeId    = $request->get('classe_id');
-        $trimestre   = $request->get('trimestre', 1);
+        $classes       = Classe::all();
+        $classeId      = $request->get('classe_id') ? (int) $request->get('classe_id') : null;
+        $trimestre     = (int) $request->get('trimestre', 1);
         $anneeScolaire = $request->get('annee_scolaire', date('Y') . '-' . (date('Y') + 1));
 
-        $eleves   = [];
-        $matieres = [];
+        $eleves   = collect();
+        $matieres = collect();
         $notes    = [];
 
         if ($classeId) {
@@ -67,32 +67,34 @@ class NoteController extends Controller
             'notes.*.*'      => 'nullable|numeric|min:0|max:20',
         ]);
 
-        $trimestre     = $request->trimestre;
+        $trimestre     = (int) $request->trimestre;
         $anneeScolaire = $request->annee_scolaire;
 
         foreach ($request->notes as $eleveId => $matieres) {
             foreach ($matieres as $matiereId => $valeur) {
                 if ($valeur === null || $valeur === '') continue;
 
-                $note = Note::updateOrCreate(
+                Note::updateOrCreate(
                     [
-                        'eleve_id'       => $eleveId,
-                        'matiere_id'     => $matiereId,
+                        'eleve_id'       => (int) $eleveId,
+                        'matiere_id'     => (int) $matiereId,
                         'trimestre'      => $trimestre,
                         'annee_scolaire' => $anneeScolaire,
                     ],
                     ['note' => $valeur]
                 );
 
-                // 🔹 Journalisation de l'ajout ou modification de note
-                $eleve   = Eleve::find($eleveId);
-                $matiere = Matiere::find($matiereId);
+                // Journalisation
+                $eleve   = Eleve::find((int) $eleveId);
+                $matiere = Matiere::find((int) $matiereId);
 
-                Activity::create([
-                    'action'  => 'Note enregistrée',
-                    'details' => "Élève: {$eleve->nom}, Matière: {$matiere->nom}, Note: {$valeur}, Trimestre: {$trimestre}, Année: {$anneeScolaire}",
-                    'user_id' => auth()->id(),
-                ]);
+                if ($eleve && $matiere) {
+                    Activity::create([
+                        'action'  => 'Note enregistrée',
+                        'details' => "Élève: {$eleve->nom}, Matière: {$matiere->nom}, Note: {$valeur}, Trimestre: {$trimestre}, Année: {$anneeScolaire}",
+                        'user_id' => auth()->id(),
+                    ]);
+                }
             }
         }
 
@@ -110,12 +112,17 @@ class NoteController extends Controller
      */
     public function classement(Request $request)
     {
-        $classeId      = $request->get('classe_id');
-        $trimestre     = $request->get('trimestre', 1);
+        $classeId      = $request->get('classe_id') ? (int) $request->get('classe_id') : null;
+        $trimestre     = (int) $request->get('trimestre', 1);
         $anneeScolaire = $request->get('annee_scolaire', date('Y') . '-' . (date('Y') + 1));
 
-        $classe      = Classe::with('eleves')->findOrFail($classeId);
-        $classement  = $this->moyenneService->classementClasse($classe, $trimestre, $anneeScolaire);
+        if (!$classeId) {
+            return redirect()->route('notes.grille')
+                ->with('error', 'Veuillez sélectionner une classe.');
+        }
+
+        $classe     = Classe::with('eleves')->findOrFail($classeId);
+        $classement = $this->moyenneService->classementClasse($classe, $trimestre, $anneeScolaire);
 
         return view('notes.classement', compact('classe', 'classement', 'trimestre', 'anneeScolaire'));
     }
@@ -127,7 +134,6 @@ class NoteController extends Controller
     {
         $chemin = $this->pdfService->genererBulletin($eleve, $trimestre, $anneeScolaire);
 
-        // 🔹 Journalisation génération bulletin
         Activity::create([
             'action'  => 'Bulletin généré',
             'details' => "Élève: {$eleve->nom}, Trimestre: {$trimestre}, Année: {$anneeScolaire}",

@@ -14,7 +14,7 @@ class PdfService
      */
     public function genererRecuPaiement(Paiement $paiement): string
     {
-        $eleve         = $paiement->eleve->load('classe.fraisScolarite');
+        $eleve           = $paiement->eleve->load('classe.fraisScolarite');
         $paiementService = app(PaiementService::class);
 
         $data = [
@@ -39,11 +39,19 @@ class PdfService
     public function genererBulletin(Eleve $eleve, int $trimestre, string $anneeScolaire): string
     {
         $moyenneService = app(MoyenneService::class);
-        $notes          = $eleve->notes()
-                            ->with('matiere')
-                            ->where('trimestre', $trimestre)
-                            ->where('annee_scolaire', $anneeScolaire)
-                            ->get();
+
+        // Récupérer les matières de la classe avec coefficient pivot
+        $matieresClasse = $eleve->classe->matieres()->get()->keyBy('id');
+
+        $notes = $eleve->notes()
+                    ->with('matiere')
+                    ->where('trimestre', $trimestre)
+                    ->where('annee_scolaire', $anneeScolaire)
+                    ->get()
+                    ->map(function ($note) use ($matieresClasse) {
+                        $note->coefficient = $matieresClasse->get($note->matiere_id)?->pivot->coefficient ?? 1;
+                        return $note;
+                    });
 
         $classement = $moyenneService->classementClasse(
             $eleve->classe, $trimestre, $anneeScolaire

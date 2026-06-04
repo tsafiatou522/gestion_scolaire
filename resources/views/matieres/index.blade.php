@@ -4,9 +4,11 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="fw-bold mb-0">Gestion des matières</h4>
+    @if($classeId)
     <a href="{{ route('matieres.create', ['classe_id' => $classeId]) }}" class="btn btn-primary btn-sm">
         <i class="bi bi-plus-lg me-1"></i> Nouvelle matière
     </a>
+    @endif
 </div>
 
 {{-- Filtre par classe --}}
@@ -29,7 +31,9 @@
     </form>
 </div>
 
-@if($classeId)
+@if(!$classeId)
+    <div class="alert alert-info">Veuillez sélectionner une classe pour voir ses matières.</div>
+@elseif($classeId)
 <div class="card">
     <table class="table table-hover mb-0 align-middle">
         <thead class="table-light">
@@ -44,15 +48,17 @@
             <tr>
                 <td class="fw-semibold">{{ $matiere->nom }}</td>
                 <td class="text-center">
-                    <span class="badge bg-secondary">{{ $matiere->coefficient }}</span>
+                    <span class="badge bg-secondary">{{ $matiere->pivot->coefficient ?? '-' }}</span>
                 </td>
                 <td class="text-center">
-                    <a href="{{ route('matieres.edit', $matiere) }}" class="btn btn-sm btn-outline-secondary">
+                    <a href="{{ route('matieres.edit', [$matiere, 'classe_id' => $classeId]) }}"
+                       class="btn btn-sm btn-outline-secondary">
                         <i class="bi bi-pencil"></i>
                     </a>
                     <form action="{{ route('matieres.destroy', $matiere) }}" method="POST" class="d-inline"
                           onsubmit="return confirm('Supprimer cette matière ?')">
                         @csrf @method('DELETE')
+                        <input type="hidden" name="classe_id" value="{{ $classeId }}">
                         <button class="btn btn-sm btn-outline-danger">
                             <i class="bi bi-trash"></i>
                         </button>

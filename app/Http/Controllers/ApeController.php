@@ -7,6 +7,8 @@ use App\Models\ApeCotisation;
 use App\Models\Eleve;
 use App\Services\PdfService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ApeController extends Controller
 {
@@ -45,7 +47,7 @@ class ApeController extends Controller
 
         ApeMembre::create($data);
 
-        return redirect()->route('ape.membres.index')
+        return redirect()->route('membres.index')
             ->with('success', 'Membre APE ajouté avec succès.');
     }
 
@@ -68,14 +70,14 @@ class ApeController extends Controller
 
         $membre->update($data);
 
-        return redirect()->route('ape.membres.index')
+        return redirect()->route('membres.index')
             ->with('success', 'Membre APE mis à jour.');
     }
 
     public function destroyMembre(ApeMembre $membre)
     {
         $membre->delete();
-        return redirect()->route('ape.membres.index')
+        return redirect()->route('membres.index')
             ->with('success', 'Membre supprimé.');
     }
 
@@ -126,35 +128,35 @@ class ApeController extends Controller
         $chemin = $this->genererRecuApePdf($cotisation);
         $cotisation->update(['recu_pdf' => $chemin]);
 
-        return redirect()->route('ape.cotisations.index')
+        return redirect()->route('cotisations.index')
             ->with('success', 'Cotisation APE enregistrée. Reçu généré.');
     }
 
     public function destroyCotisation(ApeCotisation $cotisation)
     {
         if ($cotisation->recu_pdf) {
-            \Storage::disk('public')->delete($cotisation->recu_pdf);
+            Storage::disk('public')->delete($cotisation->recu_pdf);
         }
         $cotisation->delete();
-        return redirect()->route('ape.cotisations.index')
+        return redirect()->route('cotisations.index')
             ->with('success', 'Cotisation supprimée.');
     }
 
     public function telechargerRecuCotisation(ApeCotisation $cotisation)
     {
-        if (!$cotisation->recu_pdf || !\Storage::disk('public')->exists($cotisation->recu_pdf)) {
+        if (!$cotisation->recu_pdf || !Storage::disk('public')->exists($cotisation->recu_pdf)) {
             $chemin = $this->genererRecuApePdf($cotisation);
             $cotisation->update(['recu_pdf' => $chemin]);
         }
-        return \Storage::disk('public')->download($cotisation->recu_pdf);
+        return Storage::disk('public')->download($cotisation->recu_pdf);
     }
 
     private function genererRecuApePdf(ApeCotisation $cotisation): string
     {
         $cotisation->load('eleve.classe');
-        $pdf      = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.recu_ape', compact('cotisation'));
+        $pdf      = Pdf::loadView('pdf.recu_ape', compact('cotisation'));
         $filename = 'recus_ape/recu_ape_' . $cotisation->id . '_' . now()->format('Ymd') . '.pdf';
-        \Storage::disk('public')->put($filename, $pdf->output());
+        Storage::disk('public')->put($filename, $pdf->output());
         return $filename;
     }
 }

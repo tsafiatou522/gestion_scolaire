@@ -12,13 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('activities', function (Blueprint $table) {
-    $table->id();
-    $table->string('action'); // Exemple : "Paiement enregistré"
-    $table->text('details')->nullable(); // Exemple : "Élève: Kaboré, Montant: 25000"
-    $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
-    $table->timestamps();
-});
-
+            $table->id();
+            $table->timestamps();
+        });
     }
 
     /**

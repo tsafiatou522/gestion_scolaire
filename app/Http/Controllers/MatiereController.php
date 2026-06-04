@@ -5,20 +5,21 @@ namespace App\Http\Controllers;
 use App\Models\Matiere;
 use App\Models\Classe;
 use Illuminate\Http\Request;
-use App\Models\Activity; // 🔹 Import du modèle Activity
+use App\Models\Activity;
 
 class MatiereController extends Controller
 {
     public function index(Request $request)
     {
-        $classeId = $request->get('classe_id');
+        $classeId = $request->get('classe_id') ? (int) $request->get('classe_id') : null;
         $classes  = Classe::all();
         $matieres = collect();
 
         if ($classeId) {
-            $matieres = Matiere::where('classe_id', $classeId)
-                ->orderBy('nom')
-                ->get();
+            $classe   = Classe::findOrFail($classeId);
+            $matieres = $classe->matieres()->orderBy('nom')->get();
+        } else {
+            $matieres = Matiere::orderBy('nom')->get();
         }
 
         return view('matieres.index', compact('classes', 'matieres', 'classeId'));
@@ -27,7 +28,7 @@ class MatiereController extends Controller
     public function create(Request $request)
     {
         $classes  = Classe::all();
-        $classeId = $request->get('classe_id');
+        $classeId = $request->get('classe_id') ? (int) $request->get('classe_id') : null;
         return view('matieres.create', compact('classes', 'classeId'));
     }
 
@@ -35,62 +36,112 @@ class MatiereController extends Controller
     {
         $data = $request->validate([
             'nom'         => 'required|string|max:100',
+            'code'        => 'nullable|string|max:10',
             'classe_id'   => 'required|exists:classes,id',
             'coefficient' => 'required|numeric|min:0.5|max:10',
         ]);
 
-        $matiere = Matiere::create($data);
+        $classeId    = (int) $data['classe_id'];
+        $coefficient = $data['coefficient'];
 
-        // 🔹 Journalisation création
+        // Créer ou retrouver la matière globale
+        $matiere = Matiere::firstOrCreate(
+            ['nom' => $data['nom']],
+            ['code' => $data['code'] ?? null]
+        );
+
+        // Attacher à la classe via le pivot (si pas déjà attachée)
+        $classe = Classe::findOrFail($classeId);
+        if (!$classe->matieres()->where('matiere_id', $matiere->id)->exists()) {
+            $classe->matieres()->attach($matiere->id, ['coefficient' => $coefficient]);
+        } else {
+            // Mettre à jour le coefficient si déjà attachée
+            $classe->matieres()->updateExistingPivot($matiere->id, ['coefficient' => $coefficient]);
+        }
+
         Activity::create([
             'action'  => 'Matière créée',
-            'details' => "Nom: {$matiere->nom}, Classe ID: {$matiere->classe_id}, Coefficient: {$matiere->coefficient}",
+            'details' => "Nom: {$matiere->nom}, Classe ID: {$classeId}, Coefficient: {$coefficient}",
             'user_id' => auth()->id(),
         ]);
 
         return redirect()
-            ->route('matieres.index', ['classe_id' => $data['classe_id']])
+            ->route('matieres.index', ['classe_id' => $classeId])
             ->with('success', 'Matière ajoutée avec succès.');
     }
 
-    public function edit(Matiere $matiere)
+    public function edit(Matiere $matiere, Request $request)
     {
-        $classes = Classe::all();
-        return view('matieres.edit', compact('matiere', 'classes'));
+        $classes  = Classe::all();
+        $classeId = $request->get('classe_id') ? (int) $request->get('classe_id') : null;
+
+        // Récupérer le coefficient depuis le pivot
+        $coefficient = null;
+        if ($classeId) {
+            $pivot = $matiere->classes()->where('classe_id', $classeId)->first();
+            $coefficient = $pivot ? $pivot->pivot->coefficient : null;
+        }
+
+        return view('matieres.edit', compact('matiere', 'classes', 'classeId', 'coefficient'));
     }
 
     public function update(Request $request, Matiere $matiere)
     {
         $data = $request->validate([
             'nom'         => 'required|string|max:100',
+            'code'        => 'nullable|string|max:10',
+            'classe_id'   => 'required|exists:classes,id',
             'coefficient' => 'required|numeric|min:0.5|max:10',
         ]);
 
-        $matiere->update($data);
+        $classeId    = (int) $data['classe_id'];
+        $coefficient = $data['coefficient'];
 
-        // 🔹 Journalisation modification
+        // Mettre à jour la matière globale
+        $matiere->update([
+            'nom'  => $data['nom'],
+            'code' => $data['code'] ?? null,
+        ]);
+
+        // Mettre à jour le coefficient dans le pivot
+        $classe = Classe::findOrFail($classeId);
+        $classe->matieres()->updateExistingPivot($matiere->id, ['coefficient' => $coefficient]);
+
         Activity::create([
             'action'  => 'Matière modifiée',
-            'details' => "Nom: {$matiere->nom}, Classe ID: {$matiere->classe_id}, Coefficient: {$matiere->coefficient}",
+            'details' => "Nom: {$matiere->nom}, Classe ID: {$classeId}, Coefficient: {$coefficient}",
             'user_id' => auth()->id(),
         ]);
 
         return redirect()
-            ->route('matieres.index', ['classe_id' => $matiere->classe_id])
+            ->route('matieres.index', ['classe_id' => $classeId])
             ->with('success', 'Matière mise à jour.');
     }
 
-    public function destroy(Matiere $matiere)
+    public function destroy(Matiere $matiere, Request $request)
     {
-        // 🔹 Journalisation suppression (avant delete)
+        $classeId = $request->get('classe_id') ? (int) $request->get('classe_id') : null;
+
         Activity::create([
             'action'  => 'Matière supprimée',
-            'details' => "Nom: {$matiere->nom}, Classe ID: {$matiere->classe_id}, Coefficient: {$matiere->coefficient}",
+            'details' => "Nom: {$matiere->nom}, Classe ID: {$classeId}",
             'user_id' => auth()->id(),
         ]);
 
-        $classeId = $matiere->classe_id;
-        $matiere->delete();
+        if ($classeId) {
+            // Détacher uniquement de cette classe
+            $classe = Classe::findOrFail($classeId);
+            $classe->matieres()->detach($matiere->id);
+
+            // Supprimer la matière globalement si plus rattachée à aucune classe
+            if ($matiere->classes()->count() === 0) {
+                $matiere->delete();
+            }
+        } else {
+            // Supprimer complètement
+            $matiere->classes()->detach();
+            $matiere->delete();
+        }
 
         return redirect()
             ->route('matieres.index', ['classe_id' => $classeId])

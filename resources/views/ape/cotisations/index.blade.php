@@ -1,111 +1,120 @@
 @extends('layouts.app')
-@section('title', 'Cotisations APE')
+@section('title', 'Suivi des Cotisations APE')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="fw-bold mb-0">
-        <i class="bi bi-cash-coin me-2 text-success"></i>
-        Cotisations APE
-    </h4>
-    <div class="d-flex gap-2">
-        <a href="{{ route('ape.membres.index') }}" class="btn btn-outline-primary btn-sm">
-            <i class="bi bi-people me-1"></i> Membres APE
-        </a>
-        <a href="{{ route('ape.cotisations.create') }}" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-lg me-1"></i> Nouvelle cotisation
-        </a>
+    <div>
+        <h4 class="fw-bold mb-0">💰 Caisse & Cotisations APE</h4>
+        <small class="text-muted">Année Scolaire en cours : <strong>{{ $anneeScolaire }}</strong></small>
+    </div>
+    <a href="{{ route('ape.cotisations.create') }}" class="btn btn-success rounded-pill btn-sm px-3">
+        <i class="bi bi-plus-circle-fill me-1"></i> Enregistrer une cotisation
+    </a>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card stat-card success h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="text-muted small uppercase mb-1">Total Encaissé APE</h6>
+                    <h3 class="fw-bold mb-0">{{ number_format($totalCollecte, 0, ',', ' ') }} FCFA</h3>
+                </div>
+                <i class="bi bi-piggy-bank fs-1"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card h-100">
+            <div class="card-body d-flex align-items-center">
+                <form method="GET" action="{{ route('ape.cotisations.index') }}" class="row g-2 w-100 align-items-center">
+                    <input type="hidden" name="annee_scolaire" value="{{ $anneeScolaire }}">
+                    
+                    <div class="col-sm-5">
+                        <label for="annee_scolaire_select" class="form-label small mb-1 text-muted fw-bold">Filtrer par année</label>
+                        <select id="annee_scolaire_select" name="annee_scolaire" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="2025-2026" {{ $anneeScolaire == '2025-2026' ? 'selected' : '' }}>2025-2026</option>
+                            <option value="2026-2027" {{ $anneeScolaire == '2026-2027' ? 'selected' : '' }}>2026-2027</option>
+                        </select>
+                    </div>
+
+                    <div class="col-sm-7">
+                        <label for="eleve_id" class="form-label small mb-1 text-muted fw-bold">Filtrer par élève</label>
+                        <select id="eleve_id" name="eleve_id" class="form-select form-select-sm text-uppercase" onchange="this.form.submit()">
+                            <option value="">Tous les élèves</option>
+                            @foreach($eleves as $el)
+                                <option value="{{ $el->id }}" {{ $eleveId == $el->id ? 'selected' : '' }}>
+                                    {{ $el->nom_complet }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 
-{{-- Statistique --}}
-<div class="card stat-card success p-3 mb-3" style="max-width:300px">
-    <div class="text-muted small">Total collecté ({{ $anneeScolaire }})</div>
-    <div class="fs-3 fw-bold text-success">{{ number_format($totalCollecte, 0, ',', ' ') }} FCFA</div>
-</div>
-
-{{-- Filtres --}}
-<div class="card p-3 mb-3">
-    <form method="GET" action="{{ route('ape.cotisations.index') }}" class="row g-2 align-items-end">
-        <div class="col-md-3">
-            <label class="form-label small fw-semibold">Année scolaire</label>
-            <input type="text" name="annee_scolaire" class="form-control form-control-sm"
-                   value="{{ $anneeScolaire }}">
-        </div>
-        <div class="col-md-4">
-            <label class="form-label small fw-semibold">Filtrer par élève</label>
-            <select name="eleve_id" class="form-select form-select-sm">
-                <option value="">Tous les élèves</option>
-                @foreach($eleves as $eleve)
-                    <option value="{{ $eleve->id }}" {{ $eleveId == $eleve->id ? 'selected' : '' }}>
-                        {{ $eleve->nom_complet }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-outline-primary btn-sm w-100">Filtrer</button>
-        </div>
-    </form>
-</div>
-
 <div class="card">
-    <table class="table table-hover mb-0 align-middle">
-        <thead class="table-light">
-            <tr>
-                <th>N°</th>
-                <th>Élève</th>
-                <th>Classe</th>
-                <th>Date</th>
-                <th class="text-end">Montant</th>
-                <th>Observation</th>
-                <th class="text-center">Reçu</th>
-                <th class="text-center">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($cotisations as $cotisation)
-            <tr>
-                <td class="text-muted small">#{{ str_pad($cotisation->id, 4, '0', STR_PAD_LEFT) }}</td>
-                <td class="fw-semibold">{{ $cotisation->eleve->nom_complet }}</td>
-                <td><span class="badge bg-primary">{{ $cotisation->eleve->classe->nom }}</span></td>
-                <td>{{ $cotisation->date_paiement->format('d/m/Y') }}</td>
-                <td class="text-end text-success fw-semibold">
-                    {{ number_format($cotisation->montant, 0, ',', ' ') }} FCFA
-                </td>
-                <td class="text-muted small">{{ $cotisation->observation ?? '—' }}</td>
-                <td class="text-center">
-                    @if($cotisation->recu_pdf)
-                        <a href="{{ route('ape.cotisations.recu', $cotisation) }}"
-                           class="btn btn-sm btn-outline-danger">
-                            <i class="bi bi-file-pdf"></i>
-                        </a>
-                    @else
-                        <span class="text-muted">—</span>
-                    @endif
-                </td>
-                <td class="text-center">
-                    <form action="{{ route('ape.cotisations.destroy', $cotisation) }}"
-                          method="POST" class="d-inline"
-                          onsubmit="return confirm('Supprimer cette cotisation ?')">
-                        @csrf @method('DELETE')
-                        <button class="btn btn-sm btn-outline-danger">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </form>
-                </td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="8" class="text-center text-muted py-4">
-                    Aucune cotisation enregistrée.
-                </td>
-            </tr>
-            @endforelse
-        </tbody>
-    </table>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 text-nowrap">
+                <thead>
+                    <tr class="text-muted small uppercase">
+                        <th class="ps-4">Élève</th>
+                        <th>Classe</th>
+                        <th>Montant Versé</th>
+                        <th>Date de paiement</th>
+                        <th>Observation</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($cotisations as $cotisation)
+                    <tr>
+                        <td class="ps-4">
+                            <div class="fw-bold text-dark text-uppercase">
+                                <i class="bi bi-person text-muted me-1"></i>
+                                {{ $cotisation->eleve->nom_complet ?? 'Inconnu' }}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border">
+                                {{ $cotisation->eleve->classe->nom ?? 'N/A' }}
+                            </span>
+                        </td>
+                        <td class="fw-bold text-success">{{ number_format($cotisation->montant, 0, ',', ' ') }} FCFA</td>
+                        <td>
+                            <i class="bi bi-calendar-event text-muted me-1"></i> 
+                            {{ $cotisation->date_paiement ? $cotisation->date_paiement->format('d/m/Y') : '-' }}
+                        </td>
+                        <td><small class="text-muted">{{ $cotisation->observation ?? '-' }}</small></td>
+                        <td class="text-end pe-4">
+                            <a href="{{ route('ape.cotisations.recu', $cotisation->id) }}" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 12px;" title="Télécharger le reçu">
+                                <i class="bi bi-download"></i> Reçu
+                            </a>
+                            <form action="{{ route('ape.cotisations.destroy', $cotisation->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Annuler et supprimer ce versement ?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-link text-danger p-0 ms-2">
+                                    <i class="bi bi-trash3 fs-5"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">Aucune cotisation enregistrée pour ces critères.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-    @if($cotisations->hasPages())
-    <div class="p-3">{{ $cotisations->appends(request()->query())->links() }}</div>
-    @endif
+<div class="d-flex justify-content-center mt-3">
+    {{ $cotisations->appends(request()->query())->links() }}
 </div>
 @endsection

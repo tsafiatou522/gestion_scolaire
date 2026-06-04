@@ -1,4 +1,5 @@
 <div class="row g-3">
+    <!-- Nom -->
     <div class="col-md-6">
         <label class="form-label fw-semibold">Nom <span class="text-danger">*</span></label>
         <input type="text" name="nom" class="form-control @error('nom') is-invalid @enderror"
@@ -6,6 +7,7 @@
         @error('nom')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 
+    <!-- Prénom -->
     <div class="col-md-6">
         <label class="form-label fw-semibold">Prénom <span class="text-danger">*</span></label>
         <input type="text" name="prenom" class="form-control @error('prenom') is-invalid @enderror"
@@ -13,15 +15,17 @@
         @error('prenom')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 
+    <!-- Date de naissance -->
     <div class="col-md-4">
         <label class="form-label fw-semibold">Date de naissance <span class="text-danger">*</span></label>
         <input type="date" name="date_naissance"
                class="form-control @error('date_naissance') is-invalid @enderror"
-               value="{{ old('date_naissance', isset($eleve) ? $eleve->date_naissance->format('Y-m-d') : '') }}"
+               value="{{ old('date_naissance', isset($eleve) && $eleve->date_naissance ? $eleve->date_naissance->format('Y-m-d') : '') }}"
                required>
         @error('date_naissance')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 
+    <!-- Sexe -->
     <div class="col-md-4">
         <label class="form-label fw-semibold">Sexe <span class="text-danger">*</span></label>
         <select name="sexe" class="form-select @error('sexe') is-invalid @enderror" required>
@@ -32,6 +36,7 @@
         @error('sexe')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 
+    <!-- Classe -->
     <div class="col-md-4">
         <label class="form-label fw-semibold">Classe <span class="text-danger">*</span></label>
         <select name="classe_id" class="form-select @error('classe_id') is-invalid @enderror" required>
@@ -46,6 +51,7 @@
         @error('classe_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 
+    <!-- Parent -->
     <div class="col-md-6">
         <label class="form-label fw-semibold">Nom du parent / tuteur</label>
         <input type="text" name="nom_parent"
@@ -54,6 +60,7 @@
         @error('nom_parent')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 
+    <!-- Téléphone -->
     <div class="col-md-6">
         <label class="form-label fw-semibold">Téléphone</label>
         <input type="text" name="telephone_parent"
@@ -62,6 +69,7 @@
         @error('telephone_parent')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 
+    <!-- Photo -->
     <div class="col-md-6">
         <label class="form-label fw-semibold">Photo</label>
         @if(isset($eleve) && $eleve->photo)

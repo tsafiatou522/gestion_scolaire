@@ -1,72 +1,64 @@
 @extends('layouts.app')
-@section('title', 'Nouvelle cotisation APE')
+@section('title', 'Enregistrer une cotisation')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="fw-bold mb-0">Enregistrer une cotisation APE</h4>
-    <a href="{{ route('ape.cotisations.index') }}" class="btn btn-outline-secondary btn-sm">
-        <i class="bi bi-arrow-left me-1"></i> Retour
+<div class="mb-4">
+    <a href="{{ route('ape.cotisations.index') }}" class="btn btn-sm btn-link text-muted p-0 text-decoration-none">
+        <i class="bi bi-arrow-left"></i> Retour au suivi
     </a>
+    <h4 class="fw-bold mb-0 mt-2">💰 Enregistrer un versement APE</h4>
 </div>
 
-<div class="card p-4" style="max-width:580px">
-    <form method="POST" action="{{ route('ape.cotisations.store') }}">
-        @csrf
+<div class="card" style="max-width: 650px;">
+    <div class="card-body p-4">
+        <form action="{{ route('ape.cotisations.store') }}" method="POST">
+            @csrf
 
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Élève <span class="text-danger">*</span></label>
-            <select name="eleve_id" class="form-select @error('eleve_id') is-invalid @enderror" required>
-                <option value="">-- Choisir un élève --</option>
-                @foreach($eleves as $eleve)
-                    <option value="{{ $eleve->id }}"
-                        {{ old('eleve_id', $eleveId) == $eleve->id ? 'selected' : '' }}>
-                        {{ $eleve->nom_complet }} — {{ $eleve->classe->nom }}
-                    </option>
-                @endforeach
-            </select>
-            @error('eleve_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
-        </div>
+            <div class="row g-3">
+                <div class="col-12">
+                    <label class="form-label small fw-semibold">Élève concerné <span class="text-danger">*</span></label>
+                    <select name="eleve_id" class="form-select form-select-sm text-uppercase @error('eleve_id') is-invalid @enderror" required>
+                        <option value="">-- Sélectionner l'élève --</option>
+                        @foreach($eleves as $eleve)
+                            <option value="{{ $eleve->id }}" {{ (old('eleve_id') == $eleve->id || $eleveId == $eleve->id) ? 'selected' : '' }}>
+                                {{ $eleve->nom_complet }} — Classe : {{ $eleve->classe->nom ?? 'N/A' }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('eleve_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
 
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Montant (FCFA) <span class="text-danger">*</span></label>
-            <input type="number" name="montant"
-                   class="form-control @error('montant') is-invalid @enderror"
-                   value="{{ old('montant', 1000) }}" min="1" step="500" required>
-            @error('montant')<div class="invalid-feedback">{{ $message }}</div>@enderror
-        </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">Montant (FCFA) <span class="text-danger">*</span></label>
+                    <input type="number" name="montant" min="1" class="form-control form-control-sm fw-bold text-success @error('montant') is-invalid @enderror" value="{{ old('montant') }}" required>
+                    @error('montant') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
 
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Date <span class="text-danger">*</span></label>
-            <input type="date" name="date_paiement"
-                   class="form-control @error('date_paiement') is-invalid @enderror"
-                   value="{{ old('date_paiement', date('Y-m-d')) }}" required>
-            @error('date_paiement')<div class="invalid-feedback">{{ $message }}</div>@enderror
-        </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold">Année scolaire <span class="text-danger">*</span></label>
+                    <input type="text" name="annee_scolaire" class="form-control form-control-sm @error('annee_scolaire') is-invalid @enderror" value="{{ old('annee_scolaire', '2025-2026') }}" required>
+                    @error('annee_scolaire') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
 
-        <div class="mb-3">
-            <label class="form-label fw-semibold">Année scolaire <span class="text-danger">*</span></label>
-            <input type="text" name="annee_scolaire" class="form-control"
-                   value="{{ old('annee_scolaire', '2025-2026') }}" required>
-        </div>
+                <div class="col-12">
+                    <label class="form-label small fw-semibold">Date de paiement <span class="text-danger">*</span></label>
+                    <input type="date" name="date_paiement" class="form-control form-control-sm @error('date_paiement') is-invalid @enderror" value="{{ old('date_paiement', date('Y-m-d')) }}" required>
+                    @error('date_paiement') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
 
-        <div class="mb-4">
-            <label class="form-label fw-semibold">Observation</label>
-            <input type="text" name="observation" class="form-control"
-                   value="{{ old('observation') }}"
-                   placeholder="Ex : Cotisation annuelle APE">
-        </div>
+                <div class="col-12">
+                    <label class="form-label small fw-semibold">Observation / Commentaire</label>
+                    <textarea name="observation" rows="3" class="form-control form-control-sm @error('observation') is-invalid @enderror" placeholder="Ex: Payé en espèces, reçu par le trésorier...">{{ old('observation') }}</textarea>
+                    @error('observation') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                </div>
+            </div>
 
-        <div class="alert alert-info small py-2">
-            <i class="bi bi-info-circle me-1"></i>
-            Un reçu PDF sera automatiquement généré après l'enregistrement.
-        </div>
-
-        <div class="d-flex gap-2 mt-3">
-            <button type="submit" class="btn btn-success">
-                <i class="bi bi-cash-coin me-1"></i> Enregistrer
-            </button>
-            <a href="{{ route('ape.cotisations.index') }}" class="btn btn-outline-secondary">Annuler</a>
-        </div>
-    </form>
+            <div class="mt-4 pt-2 border-top text-end">
+                <button type="submit" class="btn btn-success btn-sm px-4 rounded-pill">
+                    <i class="bi bi-printer me-1"></i> Valider & Générer le reçu
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 @endsection

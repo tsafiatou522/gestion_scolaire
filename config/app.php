@@ -27,6 +27,8 @@ return [
     */
 
     'env' => env('APP_ENV', 'production'),
+    'school_name' => env('APP_SCHOOL_NAME', 'École Primaire Joseph Ki-Zerbo'),
+
 
     /*
     |--------------------------------------------------------------------------

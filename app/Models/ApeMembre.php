@@ -3,35 +3,40 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ApeMembre extends Model
 {
     protected $table = 'ape_membres';
 
     protected $fillable = [
-        'nom', 'prenom', 'telephone', 'email',
-        'fonction', 'eleve_id', 'annee_scolaire'
+        'nom',
+        'prenom',
+        'fonction',
+        'telephone',
+        'email',
+        'eleve_id',
+        'annee_scolaire',
     ];
 
-    public function eleve(): BelongsTo
+    public function eleve()
     {
-        return $this->belongsTo(Eleve::class);
+        return $this->belongsTo(Eleve::class, 'eleve_id');
     }
 
-    public function getNomCompletAttribute(): string
+    public function getNomCompletAttribute()
     {
-        return $this->prenom . ' ' . $this->nom;
+        return $this->nom . ' ' . $this->prenom;
     }
 
-    public function getFonctionLabelAttribute(): string
+    public function getFonctionLabelAttribute()
     {
         return match($this->fonction) {
-            'president'      => 'PrÃ©sident(e)',
-            'vice_president' => 'Vice-PrÃ©sident(e)',
-            'secretaire'     => 'SecrÃ©taire',
-            'tresorier'      => 'TrÃ©sorier(Ã¨re)',
-            default          => 'Membre',
+            'president'      => 'Président',
+            'vice_president' => 'Vice-Président',
+            'secretaire'     => 'Secrétaire',
+            'tresorier'      => 'Trésorier',
+            'membre'         => 'Membre',
+            default          => ucfirst($this->fonction),
         };
     }
 }

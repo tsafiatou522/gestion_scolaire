@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany; // 1. On importe le bon type de relation
 
 class Classe extends Model
 {
@@ -25,11 +26,14 @@ class Classe extends Model
     }
 
     /**
-     * Matières de la classe
+     * Matières de la classe (Relation modifiée en Many-to-Many)
      */
-    public function matieres(): HasMany
+    public function matieres(): BelongsToMany
     {
-        return $this->hasMany(Matiere::class);
+        // 2. On utilise belongsToMany en ciblant la table pivot 'classe_matiere'
+        return $this->belongsToMany(Matiere::class, 'classe_matiere')
+                    ->withPivot('coefficient') // Permet de récupérer le coefficient facilement
+                    ->withTimestamps();
     }
 
     /**

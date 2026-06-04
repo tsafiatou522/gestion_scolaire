@@ -8,7 +8,8 @@ use App\Services\PaiementService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Historique;
-use App\Models\Activity; // 🔹 Import du modèle Activity
+use App\Models\Activity;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class EleveController extends Controller
 {
@@ -54,14 +55,12 @@ class EleveController extends Controller
 
         $eleve = Eleve::create($data);
 
-        // 🔹 Historique interne
         Historique::create([
             'utilisateur' => auth()->user()->name,
             'action'      => 'Ajout élève',
             'description' => 'Nouvel élève enregistré : ' . $eleve->nom . ' ' . $eleve->prenom,
         ]);
 
-        // 🔹 Journalisation pour le directeur
         Activity::create([
             'action'  => 'Élève inscrit',
             'details' => "Nom: {$eleve->nom}, Classe: {$eleve->classe->nom}",
@@ -110,31 +109,44 @@ class EleveController extends Controller
 
         $eleve->update($data);
 
-        // 🔹 Journalisation modification
         Activity::create([
             'action'  => 'Élève modifié',
             'details' => "Nom: {$eleve->nom}, Classe: {$eleve->classe->nom}",
             'user_id' => auth()->id(),
         ]);
 
-        return redirect()->route('eleves.show', $eleve)->with('success', 'Élève mis à jour.');
+        return redirect()->route('eleves.index')->with('success', 'Élève mis à jour.');
     }
 
     public function destroy(Eleve $eleve)
+    {
+        $eleve->load('classe');
+
+        Activity::create([
+            'action'  => 'Élève supprimé',
+            'details' => "Nom: {$eleve->nom}, Classe: " . ($eleve->classe?->nom ?? 'Non attribuée'),
+            'user_id' => auth()->id(),
+        ]);
+
+        $eleve->delete();
+
+        return redirect()->route('eleves.index')
+                         ->with('success', 'Élève supprimé avec succès.');
+    }
+    public function carte(Eleve $eleve)
 {
-    // Charger la relation classe avant suppression
     $eleve->load('classe');
 
-    Activity::create([
-        'action'  => 'Élève supprimé',
-        'details' => "Nom: {$eleve->nom}, Classe: " . ($eleve->classe?->nom ?? 'Non attribuée'),
-        'user_id' => auth()->id(),
-    ]);
-
-    $eleve->delete();
-
-    return redirect()->route('eleves.index')
-                     ->with('success', 'Élève supprimé avec succès.');
+    return view('eleves.carte', compact('eleve'));
 }
 
+
+public function imprimerCarte(Eleve $eleve)
+{
+    $eleve->load('classe');
+
+    $pdf = Pdf::loadView('eleves.carte', compact('eleve'));
+
+    return $pdf->download('carte-scolaire-'.$eleve->id.'.pdf');
+}
 }

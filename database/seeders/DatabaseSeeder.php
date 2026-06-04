@@ -8,6 +8,7 @@ use App\Models\Classe;
 use App\Models\FraisScolarite;
 use App\Models\Matiere;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -56,13 +57,102 @@ class DatabaseSeeder extends Seeder
             );
 
             foreach ($matiereParNiveau[$n['niveau']] as $nomMatiere) {
-                Matiere::firstOrCreate(
-                    ['nom' => $nomMatiere, 'classe_id' => $classe->id],
-                    ['coefficient' => 1]
+                $matiere = Matiere::firstOrCreate(
+                    ['nom' => $nomMatiere]
                 );
+
+                $classe->matieres()->syncWithoutDetaching([
+                    $matiere->id => [
+                        'coefficient' => 1
+                    ]
+                ]);
             }
         }
 
-        $this->command->info('Seeder terminé. Admin : admin@ecole.bf / password');
+        // ==========================================
+        //  NOUVEAU : CRÉATION DE QUELQUES ÉLÈVES
+        // ==========================================
+        if (DB::table('eleves')->count() == 0) {
+            DB::table('eleves')->insert([
+                ['id' => 1, 'nom' => 'TRAORE', 'prenom' => 'Ahmed', 'date_naissance' => '2016-03-12', 'classe_id' => 1, 'created_at' => now(), 'updated_at' => now()],
+                ['id' => 2, 'nom' => 'OUEDRAOGO', 'prenom' => 'Fatoumata', 'date_naissance' => '2016-07-22', 'classe_id' => 1, 'created_at' => now(), 'updated_at' => now()],
+                ['id' => 3, 'nom' => 'KABORE', 'prenom' => 'Pierre', 'date_naissance' => '2016-01-05', 'classe_id' => 2, 'created_at' => now(), 'updated_at' => now()],
+            ]);
+        }
+
+        // ==========================================
+        //  GENERATION DES DONNÉES APE
+        // ==========================================
+        
+        // 1. Membres du bureau de l'APE
+        if (DB::table('ape_membres')->count() == 0) {
+            DB::table('ape_membres')->insert([
+                [
+                    'nom' => 'SAWADOGO',
+                    'prenom' => 'Jean-Baptiste',
+                    'telephone' => '70000001',
+                    'email' => 'jean@ape.bf',
+                    'fonction' => 'president',
+                    'eleve_id' => null,
+                    'annee_scolaire' => $anneeScolaire,
+                    'created_at' => now(), 'updated_at' => now()
+                ],
+                [
+                    'nom' => 'OUEDRAOGO',
+                    'prenom' => 'Aline',
+                    'telephone' => '76000002',
+                    'email' => 'aline@ape.bf',
+                    'fonction' => 'tresorier',
+                    'eleve_id' => null,
+                    'annee_scolaire' => $anneeScolaire,
+                    'created_at' => now(), 'updated_at' => now()
+                ],
+                [
+                    'nom' => 'SANOU',
+                    'prenom' => 'Karim',
+                    'telephone' => '72000003',
+                    'email' => 'karim@ape.bf',
+                    'fonction' => 'secretaire',
+                    'eleve_id' => null,
+                    'annee_scolaire' => $anneeScolaire,
+                    'created_at' => now(), 'updated_at' => now()
+                ],
+            ]);
+        }
+
+        // 2. Cotisations APE 
+        if (DB::table('ape_cotisations')->count() == 0) {
+            DB::table('ape_cotisations')->insert([
+                [
+                    'eleve_id' => 1, 
+                    'montant' => 5000,
+                    'date_paiement' => now()->format('Y-m-d'),
+                    'annee_scolaire' => $anneeScolaire,
+                    'observation' => 'Paiement intégral reçu',
+                    'recu_pdf' => null,
+                    'created_at' => now(), 'updated_at' => now()
+                ],
+                [
+                    'eleve_id' => 2, 
+                    'montant' => 5000,
+                    'date_paiement' => now()->format('Y-m-d'),
+                    'annee_scolaire' => $anneeScolaire,
+                    'observation' => 'Payé par Chèque',
+                    'recu_pdf' => null,
+                    'created_at' => now(), 'updated_at' => now()
+                ],
+                [
+                    'eleve_id' => 3, 
+                    'montant' => 5000,
+                    'date_paiement' => now()->subDays(2)->format('Y-m-d'),
+                    'annee_scolaire' => $anneeScolaire,
+                    'observation' => 'Avance sur cotisation',
+                    'recu_pdf' => null,
+                    'created_at' => now(), 'updated_at' => now()
+                ],
+            ]);
+        }
+
+        $this->command->info('Seeder terminé. Admin : admin@ecole.bf / password (et données APE générées !)');
     }
 }

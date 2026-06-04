@@ -56,7 +56,7 @@
                         @foreach($matieres as $matiere)
                             <th class="text-center" style="min-width:90px">
                                 {{ $matiere->nom }}<br>
-                                <small class="fw-normal">coef {{ $matiere->coefficient }}</small>
+                                <small class="fw-normal">coef {{ $matiere->pivot->coefficient ?? '-' }}</small>
                             </th>
                         @endforeach
                     </tr>

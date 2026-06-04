@@ -10,9 +10,6 @@ use App\Models\User;
 use App\Services\PaiementService;
 use App\Services\MoyenneService;
 use Carbon\Carbon;
-use App\Models\ApeCotisation;
-use App\Models\ApeMembre;
-
 
 class DashboardController extends Controller
 {
@@ -24,10 +21,8 @@ class DashboardController extends Controller
     public function index()
     {
         $user    = auth()->user();
-$classes = Classe::with([
-    'eleves.paiements',
-    'fraisScolarite'
-])->get();
+        $classes = Classe::with(['eleves', 'fraisScolarite'])->get();
+
         $totalEleves   = Eleve::count();
         $totalAttendu  = 0;
         $totalCollecte = 0;
@@ -107,7 +102,7 @@ $classes = Classe::with([
         // Activité des enseignants
         $activiteEnseignants = User::where('role', 'enseignant')
             ->get()
-            ->map(function ($enseignant) {
+            ->map(function ($enseignant) use ($anneeScolaire) {
                 $derniereNote = Note::orderByDesc('updated_at')->first();
                 return [
                     'nom'          => $enseignant->name,
@@ -123,30 +118,17 @@ $classes = Classe::with([
         for ($i = 5; $i >= 0; $i--) {
             $mois = Carbon::now()->subMonths($i);
             $moisLabels[] = $mois->format('m/Y');
-            /** @var \Carbon\Carbon $mois */
             $moisData[]   = Paiement::whereYear('date_paiement', $mois->year)
                 ->whereMonth('date_paiement', $mois->month)
                 ->sum('montant_verse');
         }
 
-        // === Ajout APE et Carte scolaire ===
-        $totalCotisationsAPE = ApeCotisation::sum('montant');
-        $cotisationsRecentes = ApeCotisation::with('eleve')
-            ->orderByDesc('created_at')
-            ->take(5)
-            ->get();
-
-        $totalMembresAPE = ApeMembre::count();
-       $totalClasses = $classes->count();
-       $totalElevesCarte = $totalEleves;
         return view('dashboard.index', compact(
             'user', 'totalEleves', 'totalAttendu', 'totalCollecte',
             'tauxRecouvrement', 'elevesImpayes', 'statsClasses',
             'paiementsAujourdhui', 'totalAujourdhui',
             'dernieresNotes', 'resumeClasses',
-            'activiteEnseignants', 'moisLabels', 'moisData',
-            'totalCotisationsAPE', 'cotisationsRecentes', 'totalMembresAPE',
-            'totalClasses', 'totalElevesCarte'
+            'activiteEnseignants', 'moisLabels', 'moisData'
         ));
     }
 }
