@@ -12,6 +12,10 @@ use App\Http\Controllers\ProfilController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\RechercheController;
 use App\Http\Controllers\ApeController;
+use App\Http\Controllers\AssembleeGeneraleController;
+use App\Http\Controllers\BureauExecutifController;
+use App\Http\Controllers\CotisationConseilController;
+use App\Http\Controllers\ComiteControleController;
 use App\Http\Controllers\ActivityController;
 use Illuminate\Support\Facades\Route;
 
@@ -161,8 +165,16 @@ Route::get('/eleves/{eleve}/carte/impression', [EleveController::class, 'imprime
         ->name('ape.cotisations.recu')
         ->middleware('role:directeur,gestionnaire');
 
+    // Conseil Scolaire
+    Route::resource('assemblee', AssembleeGeneraleController::class)->middleware('role:directeur,gestionnaire');
+    Route::resource('bureau', BureauExecutifController::class)->middleware('role:directeur,gestionnaire');
+    Route::resource('cotisations-conseil', CotisationConseilController::class)->middleware('role:directeur,gestionnaire');
+    Route::resource('comite', ComiteControleController::class)->middleware('role:directeur,gestionnaire');
+
     // Activities
     Route::get('/activities', [ActivityController::class, 'index'])
         ->name('activities.index')
         ->middleware('role:directeur,gestionnaire');
 });
+
+
