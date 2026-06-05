@@ -1,11 +1,16 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('title', 'Carte scolaire')
 
 @push('styles')
 <style>
 /* Style de la carte */
-.carte-scolaire {
+.carte-gauche {
+        background: linear-gradient(180deg, #0d6efd, #0a58ca) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    .carte-scolaire {
     width: 85.6mm;
     height: 54mm;
     border-radius: 10px;
@@ -39,14 +44,7 @@
     font-size: 20px;
 }
 
-.carte-gauche .nom-ecole {
-    color: white;
-    font-size: 7px;
-    font-weight: bold;
-    text-align: center;
-    text-transform: uppercase;
-    line-height: 1.2;
-}
+.carte-gauche .nom-ecole { color: white; font-size: 6px; font-weight: bold; text-align: center; text-transform: uppercase; line-height: 1.2; }
 
 .carte-gauche .photo-eleve {
     width: 55px;
@@ -129,44 +127,36 @@
     font-style: italic;
 }
 
-@media print {
+@media print { .carte-gauche { background: linear-gradient(180deg, #0d6efd, #0a58ca) !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    body > .d-flex > .sidebar,
     .sidebar,
     .bg-white.border-bottom,
     .no-print {
         display: none !important;
     }
-
-    html, body {
-        background: white !important;
+    .main-content {
         margin: 0 !important;
         padding: 0 !important;
     }
-
     .d-flex {
         display: block !important;
     }
-
-    .main-content, .p-4, .container {
-        padding: 0 !important;
-        margin: 0 !important;
-        background: white !important;
+    .carte-gauche {
+        background: linear-gradient(180deg, #0d6efd, #0a58ca) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
-
-    .container {
-        max-width: 100% !important;
-        margin: 0 !important;
-    }
-
     .carte-scolaire {
-        margin: 20mm auto !important;
+        margin: 0 auto !important;
         box-shadow: none !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
         page-break-inside: avoid;
     }
-
     @page {
-        size: A4;
+        size: A4 landscape;
         margin: 10mm;
     }
 }
@@ -177,7 +167,7 @@
 
 <div class="container">
 
-    {{-- Boutons cachés à l'impression --}}
+    {{-- Boutons cachés Ã  l'impression --}}
     <div class="d-flex justify-content-between mb-3 no-print">
         <a href="{{ route('eleves.index') }}" class="btn btn-secondary">
             <i class="bi bi-arrow-left me-1"></i> Retour
@@ -192,8 +182,8 @@
 
         {{-- Colonne gauche : logo + photo --}}
         <div class="carte-gauche">
-            <div class="logo-ecole">🏫</div>
-            <div class="nom-ecole">École<br>Primaire</div>
+            <div class="logo-ecole"><i class="bi bi-mortarboard-fill" style="color:#0d6efd;font-size:18px;"></i></div>
+            <div class="nom-ecole">École Primaire<br>Joseph Ki-Zerbo</div>
 
             @if($eleve->photo)
                 <img src="{{ asset('storage/'.$eleve->photo) }}"
@@ -243,7 +233,7 @@
                 </div>
             </div>
 
-            <div class="pied">Gestion Scolaire — École Primaire Joseph Ki-Zerbo</div>
+            <div class="pied">Gestion Scolaire â€” École Primaire Joseph Ki-Zerbo</div>
         </div>
 
     </div>
@@ -251,3 +241,12 @@
 </div>
 
 @endsection
+
+
+
+
+
+
+
+
+

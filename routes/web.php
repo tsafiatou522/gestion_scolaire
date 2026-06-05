@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClasseController;
@@ -24,7 +24,7 @@ Route::get('/login', [AuthController::class, 'showLogin'])
 
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::post('/logout', [AuthController::class, 'logout'])
+Route::get('/logout', [AuthController::class, 'logout'])
     ->name('logout');
 
 
@@ -39,7 +39,7 @@ Route::post('/verification', [AuthController::class, 'verifyCode'])
 
 
 // --------------------
-// ROUTES PROTÉGÉES
+// ROUTES PROTÃ‰GÃ‰ES
 // --------------------
 Route::middleware(['auth'])->group(function () {
 
@@ -51,7 +51,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('classes', ClasseController::class)
         ->middleware('role:directeur');
 
-    // Élèves
+    // Ã‰lÃ¨ves
     Route::resource('eleves', EleveController::class)
         ->parameters(['eleves' => 'eleve'])
         ->middleware('role:directeur,gestionnaire');
@@ -93,7 +93,7 @@ Route::get('/eleves/{eleve}/carte/impression', [EleveController::class, 'imprime
     Route::resource('users', UserController::class)
         ->middleware('role:directeur');
 
-    // Matières
+    // MatiÃ¨res
     Route::resource('matieres', MatiereController::class)
         ->middleware('role:directeur,enseignant');
 

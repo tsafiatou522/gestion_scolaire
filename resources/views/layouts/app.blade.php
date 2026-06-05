@@ -19,7 +19,7 @@
         <div class="mb-4 mt-1">
             <h6 class="fw-bold text-white mb-0">{{ config('app.school_name') }}</h6>
             <small class="text-white-50">Gestion Scolarité</small>
-            <div class="sidebar-devise">âœ¨ Excellence - Intégrité - Succès</div>
+            <div class="sidebar-devise">✨ Excellence - Intégrité - Succès</div>
         </div>
 
         <nav class="nav flex-column">
@@ -115,12 +115,7 @@
             <a href="{{ route('profil.index') }}" class="btn btn-sm btn-outline-light w-100 mb-2">
                 <i class="bi bi-gear me-1"></i> Mon profil
             </a>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="btn btn-sm btn-outline-light w-100">
-                    <i class="bi bi-box-arrow-right me-1"></i> Déconnexion
-                </button>
-            </form>
+            <a href="/logout" class="btn btn-sm btn-outline-light w-100"><i class="bi bi-box-arrow-right me-1"></i> Déconnexion</a>
         </div>
     </div>
 
@@ -160,6 +155,10 @@
 @stack('scripts')
 </body>
 </html>
+
+
+
+
 
 
 

@@ -1,4 +1,4 @@
-/* CSS Pur - Styles personnalisés de l'application */
+﻿/* CSS Pur - Styles personnalisÃ©s de l'application */
 
 :root {
     --primary-color: #4f46e5;
@@ -532,12 +532,12 @@ img {
         margin: 0 !important;
     }
 
-    .carte-scolaire,
-    .carte-scolaire * {
-        background: white !important;
-        color: black !important;
+    .carte-scolaire, .carte-scolaire * {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
+    }
+    .carte-gauche {
+        background: linear-gradient(180deg, #0d6efd, #0a58ca) !important;
     }
     /* ========== PAGINATION ========== */
 .pagination {
@@ -581,3 +581,4 @@ img {
     height: 14px;
 }
 }
+
