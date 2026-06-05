@@ -7,7 +7,6 @@ use App\Models\Classe;
 use App\Services\PaiementService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use App\Models\Historique;
 use App\Models\Activity;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -55,11 +54,7 @@ class EleveController extends Controller
 
         $eleve = Eleve::create($data);
 
-        Historique::create([
-            'utilisateur' => auth()->user()->name,
-            'action'      => 'Ajout élève',
-            'description' => 'Nouvel élève enregistré : ' . $eleve->nom . ' ' . $eleve->prenom,
-        ]);
+        
 
         Activity::create([
             'action'  => 'Élève inscrit',
@@ -150,3 +145,4 @@ public function imprimerCarte(Eleve $eleve)
     return $pdf->download('carte-scolaire-'.$eleve->id.'.pdf');
 }
 }
+

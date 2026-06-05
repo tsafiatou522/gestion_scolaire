@@ -19,6 +19,16 @@ class NoteController extends Controller
     ) {}
 
     /**
+     * Retourne le maximum des notes selon le niveau de classe.
+     * CP1 à CE2 : 10
+     * CM1 à CM2 : 20
+     */
+    private function getNoteMax(string $niveau): int
+    {
+        return in_array($niveau, ['CP1', 'CP2', 'CE1', 'CE2']) ? 10 : 20;
+    }
+
+    /**
      * Affiche la grille de saisie des notes par classe et trimestre.
      */
     public function grilleSaisie(Request $request)
@@ -31,11 +41,15 @@ class NoteController extends Controller
         $eleves   = collect();
         $matieres = collect();
         $notes    = [];
+        $noteMax  = null;
+        $niveau   = null;
 
         if ($classeId) {
             $classe   = Classe::with(['eleves', 'matieres'])->findOrFail($classeId);
             $eleves   = $classe->eleves;
             $matieres = $classe->matieres;
+            $niveau   = $classe->niveau;
+            $noteMax  = $this->getNoteMax($classe->niveau);
 
             // Récupérer toutes les notes existantes indexées par [eleve_id][matiere_id]
             $notesExistantes = Note::where('trimestre', $trimestre)
@@ -50,7 +64,7 @@ class NoteController extends Controller
 
         return view('notes.grille', compact(
             'classes', 'classeId', 'trimestre', 'anneeScolaire',
-            'eleves', 'matieres', 'notes'
+            'eleves', 'matieres', 'notes', 'noteMax', 'niveau'
         ));
     }
 
@@ -59,12 +73,17 @@ class NoteController extends Controller
      */
     public function enregistrerGrille(Request $request)
     {
+        $classe = Classe::findOrFail($request->classe_id);
+        $noteMax = $this->getNoteMax($classe->niveau);
+
         $request->validate([
             'classe_id'      => 'required|exists:classes,id',
             'trimestre'      => 'required|in:1,2,3',
             'annee_scolaire' => 'required|string',
             'notes'          => 'required|array',
-            'notes.*.*'      => 'nullable|numeric|min:0|max:20',
+            'notes.*.*'      => "nullable|numeric|min:0|max:{$noteMax}",
+        ], [
+            'notes.*.*' => "La note doit être entre 0 et {$noteMax}.",
         ]);
 
         $trimestre     = (int) $request->trimestre;

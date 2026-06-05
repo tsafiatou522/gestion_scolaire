@@ -81,7 +81,7 @@ class DashboardController extends Controller
             ->get();
 
         // Résumé par classe avec moyennes
-        $anneeScolaire = '2025-2026';
+        $anneeScolaire = date('Y') . '-' . (date('Y') + 1);
         $resumeClasses = $classes->map(function ($classe) use ($anneeScolaire) {
             $moyennes = [];
             foreach ($classe->eleves as $eleve) {

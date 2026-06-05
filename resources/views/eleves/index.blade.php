@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 @section('title', 'Élèves')
 
 @section('content')
@@ -33,7 +33,7 @@
         </div>
         @if($classeId)
         <div class="col-md-2">
-            <a href="{{ route('eleves.index') }}" class="btn btn-outline-secondary btn-sm w-100">Réinitialiser</a>
+            <a href="{{ route('eleves.index') }}" class="btn btn-outline-secondary btn-sm w-100">RÃ©initialiser</a>
         </div>
         @endif
     </form>
@@ -44,7 +44,7 @@
         <thead class="table-light">
             <tr>
                 <th style="width:50px"></th>
-                <th>Nom & Prénom</th>
+                <th>Nom & PrÃ©nom</th>
                 <th>Classe</th>
                 <th>Sexe</th>
                 <th>Date de naissance</th>
@@ -70,7 +70,7 @@
                 <td><span class="badge bg-primary">{{ $eleve->classe->nom }}</span></td>
                 <td>{{ $eleve->sexe == 'M' ? 'Masculin' : 'Féminin' }}</td>
                 <td>{{ $eleve->date_naissance->format('d/m/Y') }}</td>
-                <td class="text-muted small">{{ $eleve->nom_parent ?? '—' }}</td>
+                <td class="text-muted small">{{ $eleve->nom_parent ?? '-' }}</td>
                 <td class="text-center">
     <a href="{{ route('eleves.show', $eleve) }}"
        class="btn btn-sm btn-outline-primary"
@@ -93,7 +93,7 @@
     <form action="{{ route('eleves.destroy', $eleve) }}"
           method="POST"
           class="d-inline"
-          onsubmit="return confirm('Supprimer cet élève ?')">
+          onsubmit="return confirm('Supprimer cet Ã©lÃ¨ve ?')">
         @csrf
         @method('DELETE')
 
@@ -115,3 +115,6 @@
     @endif
 </div>
 @endsection
+
+
+

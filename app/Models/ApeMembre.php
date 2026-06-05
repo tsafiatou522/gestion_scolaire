@@ -31,10 +31,10 @@ class ApeMembre extends Model
     public function getFonctionLabelAttribute()
     {
         return match($this->fonction) {
-            'president'      => 'Président',
-            'vice_president' => 'Vice-Président',
-            'secretaire'     => 'Secrétaire',
-            'tresorier'      => 'Trésorier',
+            'president'      => 'PrÃ©sident',
+            'vice_president' => 'Vice-PrÃ©sident',
+            'secretaire'     => 'SecrÃ©taire',
+            'tresorier'      => 'TrÃ©sorier',
             'membre'         => 'Membre',
             default          => ucfirst($this->fonction),
         };

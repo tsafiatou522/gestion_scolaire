@@ -8,7 +8,28 @@ use App\Models\Classe;
 class MoyenneService
 {
     /**
+     * Retourne le maximum des notes selon le niveau de classe.
+     * CP1 à CE2 : 10
+     * CM1 à CM2 : 20
+     */
+    private function getNoteMax(string $niveau): int
+    {
+        return in_array($niveau, ['CP1', 'CP2', 'CE1', 'CE2']) ? 10 : 20;
+    }
+
+    /**
+     * Normalise une note à l'échelle de 20.
+     * Exemple : Une note de 8/10 devient 16/20
+     */
+    private function normaliserNote($noteValue, string $niveau): float
+    {
+        $noteMax = $this->getNoteMax($niveau);
+        return ($noteValue / $noteMax) * 20;
+    }
+
+    /**
      * Calcule la moyenne trimestrielle d'un élève (pondérée par coefficient).
+     * Les notes sont normalisées à l'échelle de 20 avant le calcul.
      */
     public function calculerMoyenne(Eleve $eleve, int $trimestre, string $anneeScolaire): ?float
     {
@@ -22,12 +43,15 @@ class MoyenneService
             return null;
         }
 
+        $niveau            = $eleve->classe?->niveau;
         $totalPoints       = 0;
         $totalCoefficients = 0;
 
         foreach ($notes as $note) {
-            $coef               = $note->matiere->coefficient ?? 1;
-            $totalPoints       += $note->note * $coef;
+            $coef               = $note->matiere->pivot->coefficient ?? 1;
+            // Normaliser la note à l'échelle de 20
+            $noteNormalisee    = $this->normaliserNote($note->note, $niveau);
+            $totalPoints       += $noteNormalisee * $coef;
             $totalCoefficients += $coef;
         }
 

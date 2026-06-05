@@ -539,4 +539,45 @@ img {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
+    /* ========== PAGINATION ========== */
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+    gap: 5px;
+    align-items: center;
+}
+
+.pagination .page-item .page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    color: var(--primary-color);
+    font-size: 14px;
+    text-decoration: none;
+    background: #fff;
+    transition: all 0.3s ease;
+}
+
+.pagination .page-item .page-link:hover {
+    background: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+}
+
+.pagination .page-item svg {
+    width: 14px;
+    height: 14px;
+}
 }

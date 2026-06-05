@@ -28,12 +28,12 @@ class DatabaseSeeder extends Seeder
 
         // Matières différentes par niveau
         $matiereParNiveau = [
-            'CP1' => ['Lecture', 'Écriture', 'Calcul', 'Éveil'],
-            'CP2' => ['Lecture', 'Écriture', 'Calcul', 'Éveil'],
-            'CE1' => ['Français', 'Mathématiques', 'Sciences', 'Histoire-Géographie', 'Éducation Civique'],
-            'CE2' => ['Français', 'Mathématiques', 'Sciences', 'Histoire-Géographie', 'Éducation Civique'],
-            'CM1' => ['Français', 'Mathématiques', 'Sciences', 'Histoire-Géographie', 'Éducation Civique', 'Anglais'],
-            'CM2' => ['Français', 'Mathématiques', 'Sciences', 'Histoire-Géographie', 'Éducation Civique', 'Anglais'],
+            'CP1' => ['Lecture', 'Écriture', 'Calcul', 'Recitation/Chant','Language','Expression Ecrite','Expression Orale','Dessin'],
+            'CP2' => ['Lecture', 'Écriture', 'Calcul', 'Dictée','Recitation/Chant','Language','Copie','Expression Orale','Dessin'],
+            'CE1' => ['Redaction', 'Dictée', 'Conjugaison', 'Histoire','Géographie', 'Grammaire','Recitation/Chant','Lecture','Opération','Problème',],
+            'CE2' => ['Redaction', 'Dictée', 'Conjugaison', 'Histoire','Géographie', 'Grammaire','Recitation/Chant','Lecture','Opération','Problème',],
+            'CM1' => ['Redaction', 'Dictée', 'Etude de texte', 'Histoire-Géographie', 'Sciences', 'Problème','Opération','Dessin','Recitation/Chant','Lecture'],
+            'CM2' =>  ['Redaction', 'Dictée', 'Etude de texte', 'Histoire-Géographie', 'Sciences', 'Problème','Opération','Dessin','Recitation/Chant','Lecture'],
         ];
 
         $niveaux = [

@@ -42,6 +42,10 @@
 
 @if($classeId && count($eleves) > 0)
 <div class="card p-3">
+    <div class="alert alert-info mb-3">
+        <strong>Niveau {{ $niveau }}</strong> — Les notes doivent être entre <strong>0 et {{ $noteMax }}</strong>
+    </div>
+    
     <form method="POST" action="{{ route('notes.enregistrer') }}">
         @csrf
         <input type="hidden" name="classe_id" value="{{ $classeId }}">
@@ -70,7 +74,7 @@
                             <input type="number"
                                    name="notes[{{ $eleve->id }}][{{ $matiere->id }}]"
                                    class="form-control form-control-sm text-center"
-                                   min="0" max="20" step="0.25"
+                                   min="0" max="{{ $noteMax }}" step="0.25"
                                    value="{{ $notes[$eleve->id][$matiere->id] ?? '' }}"
                                    placeholder="—">
                         </td>

@@ -67,8 +67,6 @@ Route::get('/eleves/{eleve}/carte/impression', [EleveController::class, 'imprime
     Route::resource('paiements', PaiementController::class)
         ->except(['edit', 'update'])
         ->middleware('role:directeur,gestionnaire');
-        Route::get('/eleves/{eleve}/carte/impression', [EleveController::class, 'imprimerCarte'])
-    ->name('eleves.carte.impression');
 
     Route::get('/paiements/{paiement}/recu', [PaiementController::class, 'telechargerRecu'])
         ->name('paiements.recu')
