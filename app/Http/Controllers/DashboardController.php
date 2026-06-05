@@ -74,13 +74,13 @@ class DashboardController extends Controller
 
         $totalAujourdhui = $paiementsAujourdhui->sum('montant_verse');
 
-        // Dernières saisies de notes
+        // DerniÃƒÂ¨res saisies de notes
         $dernieresNotes = Note::with(['eleve.classe', 'matiere'])
             ->orderByDesc('updated_at')
             ->take(8)
             ->get();
 
-        // Résumé par classe avec moyennes
+        // RÃƒÂ©sumÃƒÂ© par classe avec moyennes
         $anneeScolaire = date('Y') . '-' . (date('Y') + 1);
         $resumeClasses = $classes->map(function ($classe) use ($anneeScolaire) {
             $moyennes = [];
@@ -99,7 +99,7 @@ class DashboardController extends Controller
             ];
         });
 
-        // Activité des enseignants
+        // ActivitÃƒÂ© des enseignants
         $activiteEnseignants = User::where('role', 'enseignant')
             ->get()
             ->map(function ($enseignant) use ($anneeScolaire) {
@@ -111,7 +111,7 @@ class DashboardController extends Controller
                 ];
             });
 
-        // Données graphique paiements 6 derniers mois
+        // DonnÃƒÂ©es graphique paiements 6 derniers mois
         $moisLabels = [];
         $moisData   = [];
 
@@ -123,12 +123,18 @@ class DashboardController extends Controller
                 ->sum('montant_verse');
         }
 
+        $elevesClasse = $user->isEnseignant() && $user->classe_id
+            ? Eleve::where('classe_id', $user->classe_id)->with('classe')->orderBy('nom')->get()
+            : collect();
+
         return view('dashboard.index', compact(
             'user', 'totalEleves', 'totalAttendu', 'totalCollecte',
             'tauxRecouvrement', 'elevesImpayes', 'statsClasses',
             'paiementsAujourdhui', 'totalAujourdhui',
             'dernieresNotes', 'resumeClasses',
-            'activiteEnseignants', 'moisLabels', 'moisData'
+            'activiteEnseignants', 'moisLabels', 'moisData', 'elevesClasse'
         ));
     }
 }
+
+

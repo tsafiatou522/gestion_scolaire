@@ -58,7 +58,8 @@
             </a>
             @endif
 
-            <div class="sidebar-heading">Association Parents (APE)</div>
+            @if(!auth()->user()->isEnseignant())
+<div class="sidebar-heading">Association Parents (APE)</div>
             
             <a href="{{ route('ape.membres.index') }}"
                class="nav-link {{ request()->routeIs('ape.membres.*') ? 'active' : '' }}">
@@ -69,6 +70,7 @@
                class="nav-link {{ request()->routeIs('ape.cotisations.*') ? 'active' : '' }}">
                 <i class="bi bi-piggy-bank-fill me-2"></i> Cotisations APE
             </a>
+@endif
 
             <div class="sidebar-heading">Historique</div>
             <a href="{{ route('activities.index') }}"
@@ -155,6 +157,8 @@
 @stack('scripts')
 </body>
 </html>
+
+
 
 
 
