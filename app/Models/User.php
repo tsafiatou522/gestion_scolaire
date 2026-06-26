@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use Notifiable;
+    use HasApiTokens, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'role', 'verification'];
+    protected $fillable = ['name', 'email', 'password', 'role', 'verification', 'classe_id'];
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -28,5 +30,18 @@ class User extends Authenticatable
     public function isGestionnaire(): bool
     {
         return $this->role === 'gestionnaire';
+    }
+
+    public function isParent(): bool
+    {
+        return $this->role === 'parent';
+    }
+
+    /**
+     * Eleves rattaches a ce parent
+     */
+    public function eleves(): BelongsToMany
+    {
+        return $this->belongsToMany(Eleve::class, 'parent_eleve');
     }
 }

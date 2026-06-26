@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Eleve extends Model
@@ -45,6 +46,22 @@ class Eleve extends Model
     public function notes(): HasMany
     {
         return $this->hasMany(Note::class);
+    }
+
+    /**
+     * Absences de l'élève
+     */
+    public function absences(): HasMany
+    {
+        return $this->hasMany(Absence::class);
+    }
+
+    /**
+     * Comptes parents rattaches a cet eleve
+     */
+    public function parents(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'parent_eleve');
     }
 
     /**
