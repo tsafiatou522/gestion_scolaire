@@ -22,3 +22,17 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Android / Gradle (mobile-android)
+SuiviScolaire/build/
+SuiviScolaire/app/build/
+SuiviScolaire/.gradle/
+SuiviScolaire/local.properties
+SuiviScolaire/.idea/
+SuiviScolaire/*.iml
+SuiviScolaire/app/*.iml
+SuiviScolaire/captures/
+SuiviScolaire/.externalNativeBuild
+SuiviScolaire/.cxx
+SuiviScolaire/*.apk
+SuiviScolaire/*.aab
